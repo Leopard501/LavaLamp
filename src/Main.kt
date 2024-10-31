@@ -2,6 +2,7 @@ import processing.core.PApplet
 import processing.core.PVector
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.pow
 
 var app = Main()
 
@@ -31,7 +32,7 @@ class Main: PApplet() {
         rectMode(CORNERS)
 
         parameters = Parameters()
-        repeat(parameters[FloatValues.BallCount].toInt()) {
+        repeat(parameters[FloatValue.BallCount].toInt()) {
             balls.add(Ball())
         }
         grid = Grid()
@@ -50,12 +51,12 @@ class Main: PApplet() {
     private fun update() {
         balls.forEach { ball -> ball.update() }
 
-        val oldFloats = EnumMap(parameters.floatValues.map { Pair(it.key, it.value.get()) }.toMap())
+        val oldFloats = EnumMap(parameters.floatValue.map { Pair(it.key, it.value.get()) }.toMap())
         val oldBooleans = EnumMap(parameters.booleanValues.map { Pair(it.key, it.value.get()) }.toMap())
         parameters.update()
 
-        val newCount = parameters[FloatValues.BallCount].toInt()
-        val oldCount = oldFloats.getValue(FloatValues.BallCount).toInt()
+        val newCount = parameters[FloatValue.BallCount].toInt()
+        val oldCount = oldFloats.getValue(FloatValue.BallCount).toInt()
         if (oldCount > newCount) {
             balls.shuffle()
             balls.subList(newCount-1, oldCount-1).clear()
@@ -69,8 +70,8 @@ class Main: PApplet() {
             }
         }
 
-        if (oldFloats.getValue(FloatValues.BallRadius) != parameters[FloatValues.BallRadius] ||
-            oldFloats.getValue(FloatValues.LavaScale) != parameters[FloatValues.LavaScale] ||
+        if (oldFloats.getValue(FloatValue.BallRadius) != parameters[FloatValue.BallRadius] ||
+            oldFloats.getValue(FloatValue.LavaScale) != parameters[FloatValue.LavaScale] ||
             oldBooleans.getValue(BooleanValues.ShowLava) != parameters[BooleanValues.ShowLava]) {
             grid = Grid()
             balls.forEach { ball -> ball.assignCell() }
