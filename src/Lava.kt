@@ -5,22 +5,12 @@ import java.awt.Color
 
 class Lava {
 
-    private lateinit var img: PImage
+    private var img: PImage = app.createImage(
+        ((parameters.bounds.second.x - parameters.bounds.first.x) * parameters[Parameters.FloatValues.ImgScale]).toInt(),
+        ((parameters.bounds.second.y - parameters.bounds.first.y) * parameters[Parameters.FloatValues.ImgScale]).toInt(),
+        RGB)
 
     init {
-        createImg()
-    }
-
-    fun createImg() {
-        img = app.createImage(
-            ((parameters.bounds.second.x - parameters.bounds.first.x) * parameters[Parameters.FloatValues.ImgScale]).toInt(),
-            ((parameters.bounds.second.y - parameters.bounds.first.y) * parameters[Parameters.FloatValues.ImgScale]).toInt(),
-            RGB)
-    }
-
-    fun update() {
-        createImg()
-
         for (x in 0..<img.width) {
             for (y in 0..<img.height) {
                 var dist = MAX_FLOAT

@@ -76,12 +76,8 @@ class Main: PApplet() {
             balls.forEach { ball -> ball.assignCell() }
         }
 
-        if (oldFloats[Parameters.FloatValues.ImgScale] != parameters[Parameters.FloatValues.ImgScale]) {
-            lava.createImg()
-        }
-
         if (parameters[Parameters.BooleanValues.ShowLava]) {
-            lava.update()
+            lava = Lava()
         }
     }
 
