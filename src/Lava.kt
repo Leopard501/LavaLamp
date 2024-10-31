@@ -6,8 +6,8 @@ import java.awt.Color
 class Lava {
 
     private var img: PImage = app.createImage(
-        ((parameters.bounds.second.x - parameters.bounds.first.x) * parameters[Parameters.FloatValues.ImgScale]).toInt(),
-        ((parameters.bounds.second.y - parameters.bounds.first.y) * parameters[Parameters.FloatValues.ImgScale]).toInt(),
+        ((parameters.bounds.second.x - parameters.bounds.first.x) * parameters[FloatValues.ImgScale]).toInt(),
+        ((parameters.bounds.second.y - parameters.bounds.first.y) * parameters[FloatValues.ImgScale]).toInt(),
         RGB)
 
     init {
@@ -15,22 +15,21 @@ class Lava {
             for (y in 0..<img.height) {
                 var dist = MAX_FLOAT
                 for (ball in grid.getNeighborBalls(
-                    PVector(x.toFloat(), y.toFloat()) / parameters[Parameters.FloatValues.ImgScale])
+                    PVector(x.toFloat(), y.toFloat()) / parameters[FloatValues.ImgScale])
                 ) {
                     dist = min(
-                        (ball.position * parameters[Parameters.FloatValues.ImgScale]
-                                - PVector(x.toFloat(), y.toFloat())).mag(),
+                        (ball.position * parameters[FloatValues.ImgScale] - PVector(x.toFloat(), y.toFloat())).mag(),
                         dist,
                     )
                 }
-                var showDist = dist * (1 - parameters[Parameters.FloatValues.LavaScale])
-                if (parameters[Parameters.BooleanValues.ClampLava]) {
+                var showDist = (dist / parameters[FloatValues.ImgScale]) / parameters[FloatValues.LavaScale]
+                if (parameters[BooleanValues.ClampLava]) {
                     showDist = if (showDist > 1f) { 1f } else { 0f }
                 }
                 img.pixels[x + y * img.width] = lerpColor(
-                    if (parameters[Parameters.BooleanValues.ShowGrid]) {
+                    if (parameters[BooleanValues.ShowGrid]) {
                         grid.colorize(PVector(x.toFloat(), y.toFloat())
-                                / parameters[Parameters.FloatValues.ImgScale])
+                                / parameters[FloatValues.ImgScale])
                     } else {
                         parameters.ballColor
                     }.rgb,

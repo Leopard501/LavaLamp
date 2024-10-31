@@ -31,7 +31,7 @@ class Main: PApplet() {
         rectMode(CORNERS)
 
         parameters = Parameters()
-        repeat(parameters[Parameters.FloatValues.BallCount].toInt()) {
+        repeat(parameters[FloatValues.BallCount].toInt()) {
             balls.add(Ball())
         }
         grid = Grid()
@@ -54,8 +54,8 @@ class Main: PApplet() {
         val oldBooleans = EnumMap(parameters.booleanValues.map { Pair(it.key, it.value.get()) }.toMap())
         parameters.update()
 
-        val newCount = parameters[Parameters.FloatValues.BallCount].toInt()
-        val oldCount = oldFloats.getValue(Parameters.FloatValues.BallCount).toInt()
+        val newCount = parameters[FloatValues.BallCount].toInt()
+        val oldCount = oldFloats.getValue(FloatValues.BallCount).toInt()
         if (oldCount > newCount) {
             balls.shuffle()
             balls.subList(newCount-1, oldCount-1).clear()
@@ -69,14 +69,14 @@ class Main: PApplet() {
             }
         }
 
-        if (oldFloats.getValue(Parameters.FloatValues.BallRadius) != parameters[Parameters.FloatValues.BallRadius] ||
-            oldFloats.getValue(Parameters.FloatValues.LavaScale) != parameters[Parameters.FloatValues.LavaScale] ||
-            oldBooleans.getValue(Parameters.BooleanValues.ShowLava) != parameters[Parameters.BooleanValues.ShowLava]) {
+        if (oldFloats.getValue(FloatValues.BallRadius) != parameters[FloatValues.BallRadius] ||
+            oldFloats.getValue(FloatValues.LavaScale) != parameters[FloatValues.LavaScale] ||
+            oldBooleans.getValue(BooleanValues.ShowLava) != parameters[BooleanValues.ShowLava]) {
             grid = Grid()
             balls.forEach { ball -> ball.assignCell() }
         }
 
-        if (parameters[Parameters.BooleanValues.ShowLava]) {
+        if (parameters[BooleanValues.ShowLava]) {
             lava = Lava()
         }
     }
@@ -88,14 +88,12 @@ class Main: PApplet() {
         rect(parameters.bounds.first.x, parameters.bounds.first.y,
             parameters.bounds.second.x, parameters.bounds.second.y)
 
-        if (parameters[Parameters.BooleanValues.ShowLava]) {
+        if (parameters[BooleanValues.ShowLava])
             lava.display()
-        }
-        if (parameters[Parameters.BooleanValues.ShowBalls])
+        if (parameters[BooleanValues.ShowBalls])
             balls.forEach { ball -> ball.display() }
-        if (parameters[Parameters.BooleanValues.ShowGrid]) {
+        if (parameters[BooleanValues.ShowGrid])
             grid.display()
-        }
 
         parameters.display()
     }

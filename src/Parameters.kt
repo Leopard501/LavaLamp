@@ -4,11 +4,30 @@ import processing.core.PVector
 import java.awt.Color
 import java.util.*
 
-class Parameters: Cloneable {
+enum class FloatValues(val id: String, val initial: Float, val min: Float, val max: Float) {
+    BallRed("Red", 1f, 0f, 1f),
+    BallGreen("Green", 0f, 0f, 1f),
+    BallBlue("Blue", 0f, 0f, 1f),
+    BallAlpha("Alpha", 100f, 0f, 255f),
+    BallCount("Ball Count", 100f, 1f, 2500f),
+    BallRadius("Ball Radius", 10f, 1f, 100f),
+    BallStartingVel("Starting Velocity", 3f, 0f, 50f),
+    BallSpring("Springiness", 1f, 0f, 5f),
+    Gravity("Gravity", 0.1f, 0f, 1f),
+    Dampening("Dampening", 0.9f, 0f, 1.1f),
+    ImgScale("Image Scale", 0.2f, 0f, 1f),
+    LavaScale("Lava Scale", 50f, 1f, 500f),
+}
 
-    public override fun clone(): Parameters {
-        return super.clone() as Parameters
-    }
+enum class BooleanValues(val id: String, val initial: Boolean) {
+    DampeningOnCollisions("Dampening on Collisions", true),
+    ShowBalls("Show Balls", true),
+    ShowLava("Show Lava", false),
+    ClampLava("Clamp Lava", false),
+    ShowGrid("Show Grid", true),
+}
+
+class Parameters {
 
     data class Parameter<T>(private var v: T) {
         fun get(): T {
@@ -104,29 +123,6 @@ class Parameters: Cloneable {
         }
     }
 
-    enum class FloatValues(val id: String, val initial: Float, val min: Float, val max: Float) {
-        BallRed("Red", 1f, 0f, 1f),
-        BallGreen("Green", 0f, 0f, 1f),
-        BallBlue("Blue", 0f, 0f, 1f),
-        BallAlpha("Alpha", 100f, 0f, 255f),
-        BallCount("Ball Count", 100f, 1f, 2500f),
-        BallRadius("Ball Radius", 10f, 1f, 100f),
-        BallStartingVel("Starting Velocity", 3f, 0f, 50f),
-        BallSpring("Springiness", 1f, 0f, 5f),
-        Gravity("Gravity", 0.1f, 0f, 1f),
-        Dampening("Dampening", 0.9f, 0f, 1.1f),
-        ImgScale("Image Scale", 0.2f, 0f, 1f),
-        LavaScale("Lava Scale", 0.5f, 0f, 0.99f),
-    }
-
-    enum class BooleanValues(val id: String, val initial: Boolean) {
-        DampeningOnCollisions("Dampening on Collisions", true),
-        ShowBalls("Show Balls", true),
-        ShowLava("Show Lava", false),
-        ClampLava("Clamp Lava", false),
-        ShowGrid("Show Grid", true),
-    }
-
     var floatValues = EnumMap(FloatValues.entries.associateWith { Parameter(it.initial) })
     var booleanValues = EnumMap(BooleanValues.entries.associateWith { Parameter(it.initial) })
 
@@ -141,7 +137,7 @@ class Parameters: Cloneable {
         e -> Checkbox(sliders.last().height + (e.key.ordinal + 2) * 20f, e.value, e.key.id)
     }
 
-    var sliderHeld = false;
+    var sliderHeld = false
 
     fun display() {
         sliders.forEach { slider -> slider.display() }

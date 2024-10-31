@@ -14,16 +14,12 @@ class Grid {
 
     init {
         val boundsSize = parameters.bounds.second - parameters.bounds.first
-        println("${1 / parameters[Parameters.FloatValues.ImgScale]}, ${1 - parameters[Parameters.FloatValues.LavaScale]} ${(1 / parameters[Parameters.FloatValues.ImgScale]) /
-                (1 - parameters[Parameters.FloatValues.LavaScale])}")
-        val shortSide = if (parameters[Parameters.BooleanValues.ShowLava]) {
+        val shortSide = if (parameters[BooleanValues.ShowLava]) {
             max(
-                parameters[Parameters.FloatValues.BallRadius] * 2,
-                ((1 / parameters[Parameters.FloatValues.ImgScale]) /
-                    (1 - parameters[Parameters.FloatValues.LavaScale]))
-                        / max(boundsSize.x, boundsSize.y))
+                parameters[FloatValues.BallRadius] * 2,
+                parameters[FloatValues.LavaScale])
         } else {
-            parameters[Parameters.FloatValues.BallRadius] * 2
+            parameters[FloatValues.BallRadius] * 2
         }
         val ratio = max(boundsSize.x, boundsSize.y) / min(boundsSize.x, boundsSize.y)
         cellSize = if (boundsSize.x > boundsSize.y) {
