@@ -2,6 +2,7 @@ import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PVector
 import java.awt.Color
+import java.util.*
 
 class Parameters: Cloneable {
 
@@ -126,8 +127,8 @@ class Parameters: Cloneable {
         ShowGrid("Show Grid", true),
     }
 
-    var floatValues = FloatValues.entries.associateWith { Parameter(it.initial) }
-    var booleanValues = BooleanValues.entries.associateWith { Parameter(it.initial) }
+    var floatValues = EnumMap(FloatValues.entries.associateWith { Parameter(it.initial) })
+    var booleanValues = EnumMap(BooleanValues.entries.associateWith { Parameter(it.initial) })
 
     var ballColor = getColor()
     var bounds = Pair(PVector(0f, 0f), PVector(900f, 900f))
@@ -148,29 +149,23 @@ class Parameters: Cloneable {
     }
 
     fun update() {
-        var changed = false
-
         sliders.forEach { slider -> slider.update() }
         checkboxes.forEach { checkbox -> checkbox.update() }
 
         ballColor = getColor()
     }
 
-    fun getFloat(value: FloatValues): Float {
-        // this assert should never fail
-        return floatValues[value]!!.get()
-    }
-
-    fun getBoolean(value: BooleanValues): Boolean {
-        // this assert should never fail
-        return booleanValues[value]!!.get()
-    }
-
     private fun getColor(): Color {
         return Color(
-            floatValues[FloatValues.BallRed]?.get() ?: 1f,
-            floatValues[FloatValues.BallGreen]?.get() ?: 1f,
-            floatValues[FloatValues.BallBlue]?.get() ?: 1f,
+            floatValues.getValue(FloatValues.BallRed).get(),
+            floatValues.getValue(FloatValues.BallGreen).get(),
+            floatValues.getValue(FloatValues.BallBlue).get(),
         )
     }
+
+    operator fun get(key: FloatValues): Float =
+        floatValues.getValue(key).get()
+
+    operator fun get(key: BooleanValues): Boolean =
+        booleanValues.getValue(key).get()
 }

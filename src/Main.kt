@@ -1,5 +1,7 @@
 import processing.core.PApplet
 import processing.core.PVector
+import java.util.*
+import kotlin.collections.ArrayList
 
 var app = Main()
 
@@ -29,7 +31,7 @@ class Main: PApplet() {
         rectMode(CORNERS)
 
         parameters = Parameters()
-        repeat(parameters.getFloat(Parameters.FloatValues.BallCount).toInt()) {
+        repeat(parameters[Parameters.FloatValues.BallCount].toInt()) {
             balls.add(Ball())
         }
         grid = Grid()
@@ -48,12 +50,12 @@ class Main: PApplet() {
     private fun update() {
         balls.forEach { ball -> ball.update() }
 
-        val oldFloats = parameters.floatValues.map { Pair(it.key, it.value.get()) }.toMap()
-        val oldBooleans = parameters.booleanValues.map { Pair(it.key, it.value.get()) }.toMap()
+        val oldFloats = EnumMap(parameters.floatValues.map { Pair(it.key, it.value.get()) }.toMap())
+        val oldBooleans = EnumMap(parameters.booleanValues.map { Pair(it.key, it.value.get()) }.toMap())
         parameters.update()
 
-        val newCount = parameters.getFloat(Parameters.FloatValues.BallCount).toInt()
-        val oldCount = oldFloats[Parameters.FloatValues.BallCount]!!.toInt()
+        val newCount = parameters[Parameters.FloatValues.BallCount].toInt()
+        val oldCount = oldFloats.getValue(Parameters.FloatValues.BallCount).toInt()
         if (oldCount > newCount) {
             balls.shuffle()
             balls.subList(newCount-1, oldCount-1).clear()
@@ -67,18 +69,18 @@ class Main: PApplet() {
             }
         }
 
-        if (oldFloats[Parameters.FloatValues.BallRadius] != parameters.getFloat(Parameters.FloatValues.BallRadius) ||
-            oldFloats[Parameters.FloatValues.LavaScale] != parameters.getFloat(Parameters.FloatValues.LavaScale) ||
-            oldBooleans[Parameters.BooleanValues.ShowLava] != parameters.getBoolean(Parameters.BooleanValues.ShowLava)) {
+        if (oldFloats.getValue(Parameters.FloatValues.BallRadius) != parameters[Parameters.FloatValues.BallRadius] ||
+            oldFloats.getValue(Parameters.FloatValues.LavaScale) != parameters[Parameters.FloatValues.LavaScale] ||
+            oldBooleans.getValue(Parameters.BooleanValues.ShowLava) != parameters[Parameters.BooleanValues.ShowLava]) {
             grid = Grid()
             balls.forEach { ball -> ball.assignCell() }
         }
 
-        if (oldFloats[Parameters.FloatValues.ImgScale] != parameters.getFloat(Parameters.FloatValues.ImgScale)) {
+        if (oldFloats[Parameters.FloatValues.ImgScale] != parameters[Parameters.FloatValues.ImgScale]) {
             lava.createImg()
         }
 
-        if (parameters.getBoolean(Parameters.BooleanValues.ShowLava)) {
+        if (parameters[Parameters.BooleanValues.ShowLava]) {
             lava.update()
         }
     }
@@ -90,12 +92,12 @@ class Main: PApplet() {
         rect(parameters.bounds.first.x, parameters.bounds.first.y,
             parameters.bounds.second.x, parameters.bounds.second.y)
 
-        if (parameters.getBoolean(Parameters.BooleanValues.ShowLava)) {
+        if (parameters[Parameters.BooleanValues.ShowLava]) {
             lava.display()
         }
-        if (parameters.getBoolean(Parameters.BooleanValues.ShowBalls))
+        if (parameters[Parameters.BooleanValues.ShowBalls])
             balls.forEach { ball -> ball.display() }
-        if (parameters.getBoolean(Parameters.BooleanValues.ShowGrid)) {
+        if (parameters[Parameters.BooleanValues.ShowGrid]) {
             grid.display()
         }
 

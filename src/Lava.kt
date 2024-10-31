@@ -13,8 +13,8 @@ class Lava {
 
     fun createImg() {
         img = app.createImage(
-            ((parameters.bounds.second.x - parameters.bounds.first.x) * parameters.getFloat(Parameters.FloatValues.ImgScale)).toInt(),
-            ((parameters.bounds.second.y - parameters.bounds.first.y) * parameters.getFloat(Parameters.FloatValues.ImgScale)).toInt(),
+            ((parameters.bounds.second.x - parameters.bounds.first.x) * parameters[Parameters.FloatValues.ImgScale]).toInt(),
+            ((parameters.bounds.second.y - parameters.bounds.first.y) * parameters[Parameters.FloatValues.ImgScale]).toInt(),
             RGB)
     }
 
@@ -25,22 +25,22 @@ class Lava {
             for (y in 0..<img.height) {
                 var dist = MAX_FLOAT
                 for (ball in grid.getNeighborBalls(
-                    PVector(x.toFloat(), y.toFloat()) / parameters.getFloat(Parameters.FloatValues.ImgScale))
+                    PVector(x.toFloat(), y.toFloat()) / parameters[Parameters.FloatValues.ImgScale])
                 ) {
                     dist = min(
-                        (ball.position * parameters.getFloat(Parameters.FloatValues.ImgScale)
+                        (ball.position * parameters[Parameters.FloatValues.ImgScale]
                                 - PVector(x.toFloat(), y.toFloat())).mag(),
                         dist,
                     )
                 }
-                var showDist = dist * (1 - parameters.getFloat(Parameters.FloatValues.LavaScale))
-                if (parameters.getBoolean(Parameters.BooleanValues.ClampLava)) {
+                var showDist = dist * (1 - parameters[Parameters.FloatValues.LavaScale])
+                if (parameters[Parameters.BooleanValues.ClampLava]) {
                     showDist = if (showDist > 1f) { 1f } else { 0f }
                 }
                 img.pixels[x + y * img.width] = lerpColor(
-                    if (parameters.getBoolean(Parameters.BooleanValues.ShowGrid)) {
+                    if (parameters[Parameters.BooleanValues.ShowGrid]) {
                         grid.colorize(PVector(x.toFloat(), y.toFloat())
-                                / parameters.getFloat(Parameters.FloatValues.ImgScale))
+                                / parameters[Parameters.FloatValues.ImgScale])
                     } else {
                         parameters.ballColor
                     }.rgb,
