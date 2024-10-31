@@ -120,3 +120,19 @@ operator fun PVector.minus(v: PVector): PVector {
 operator fun PVector.times(n: Float): PVector {
     return PVector.mult(this, n)
 }
+
+fun max(v1: PVector, v2: PVector): PVector {
+    return if (v1.mag() > v1.mag()) {
+        v1
+    } else {
+        v2
+    }
+}
+
+fun min(v1: PVector, v2: PVector): PVector {
+    return if (v1.mag() < v1.mag()) {
+        v1
+    } else {
+        v2
+    }
+}

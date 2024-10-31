@@ -1,6 +1,5 @@
+import processing.core.PConstants
 import processing.core.PVector
-import kotlin.math.abs
-import kotlin.math.min
 
 class Ball {
 
@@ -42,20 +41,15 @@ class Ball {
         for (other in grid.getNeighborBalls(position)) {
             if (other == this) continue
 
-            if ((other.position - position).mag() < parameters[FloatValue.BallRadius] * 2) {
-                val center = PVector(
-                    min(position.x, other.position.x) + abs(position.x - other.position.x) / 2f,
-                    min(position.y, other.position.y) + abs(position.y - other.position.y) / 2f
-                )
-                val damp = if (parameters[BooleanValues.DampeningOnCollisions]) {
-                    1 - parameters[FloatValue.Dampening]
-                } else { 1f }
-                velocity =
-                    (velocity + (position - center)
-                        .setMag(parameters[FloatValue.BallSpring])) * damp
-                other.velocity =
-                    (other.velocity + (other.position - center)
-                        .setMag(parameters[FloatValue.BallSpring])) * damp
+            val disp = other.position - position
+            val minDist = parameters[FloatValue.BallRadius] * 2
+            if (disp.mag() < minDist) {
+                val target = position + disp.setMag(minDist)
+                var f = (target - other.position) * parameters[FloatValue.BallSpring]
+                val df = velocity * parameters[FloatValue.BallSpring] * parameters[FloatValue.Dampening]
+                f += df
+                velocity -= f
+                other.velocity += f
             }
         }
 

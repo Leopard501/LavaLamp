@@ -10,18 +10,17 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallGreen("Green", 0f, 0f, 1f, 1),
     BallBlue("Blue", 0f, 0f, 1f, 1),
     BallAlpha("Alpha", 100f, 0f, 255f, 1),
-    BallCount("Ball Count", 100f, 1f, 2500f, 3),
-    BallRadius("Ball Radius", 10f, 1f, 100f, 1),
-    BallStartingVel("Starting Velocity", 3f, 0f, 50f, 1),
-    BallSpring("Springiness", 1f, 0f, 5f, 1),
+    BallCount("Ball Count", 20f, 1f, 2500f, 3),
+    BallRadius("Ball Radius", 50f, 1f, 100f, 1),
+    BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2),
+    BallSpring("Springiness", 0.05f, 0f, 1f, 2),
     Gravity("Gravity", 0.1f, 0f, 1f, 2),
-    Dampening("Dampening", 0.1f, -0.1f, 1f, 1),
+    Dampening("Dampening", 0.1f, 0f, 1f, 1),
     ImgScale("Image Scale", 0.2f, 0f, 1f, 1),
     LavaScale("Lava Scale", 50f, 1f, 500f, 1),
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
-    DampeningOnCollisions("Dampening on Collisions", true),
     ShowBalls("Show Balls", true),
     ShowLava("Show Lava", false),
     ClampLava("Clamp Lava", false),
