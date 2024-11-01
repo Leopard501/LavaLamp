@@ -1,5 +1,8 @@
+import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PVector
+import java.awt.Color
+import kotlin.math.pow
 
 class Ball {
 
@@ -10,6 +13,8 @@ class Ball {
     private var velocity = PVector.random2D().setMag(app.random(
         parameters[FloatValue.BallStartingVel]))
     private var cell: Grid.Cell? = null
+
+    private var test = PVector(0f, 0f)
 
     fun update() {
         // basic movement
@@ -56,8 +61,9 @@ class Ball {
 
             // stickiness
             if (parameters[FloatValue.BallStick] > 0) {
-                val target = position
-                val f = (target - other.position) * parameters[FloatValue.BallStick]
+                val dist = ((position - other.position).mag() / parameters[FloatValue.BallRadius]).coerceAtLeast(1f)
+                val f = (position - other.position).setMag(1 / dist.pow(2)) * parameters[FloatValue.BallStick]
+                test = f
                 velocity -= f
             }
         }
@@ -79,8 +85,13 @@ class Ball {
         if (parameters[BooleanValues.ShowGrid]) {
             app.fill(grid.colorize(position).rgb)
         } else {
-            app.fill(parameters.ballColor.rgb, parameters[FloatValue.BallAlpha])
+            val testColor = PApplet.lerpColor(Color.BLUE.rgb, Color.RED.rgb,
+                test.mag() / parameters[FloatValue.BallStick], PConstants.RGB)
+
+            app.fill(testColor, parameters[FloatValue.BallAlpha])
         }
         app.circle(position.x, position.y, parameters[FloatValue.BallRadius] * 2)
+
+//        app.text(test.toString(), position.x, position.y)
     }
 }

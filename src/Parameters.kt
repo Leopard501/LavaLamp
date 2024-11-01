@@ -14,7 +14,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallRadius("Ball Radius", 50f, 1f, 100f, 1),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2),
     BallSpring("Springiness", 0.05f, 0f, 1f, 2),
-    BallStick("Stickiness", 0.005f, 0f, 0.05f, 3),
+    BallStick("Stickiness", 0.05f, 0f, 1f, 2),
     Gravity("Gravity", 0.1f, 0f, 1f, 2),
     Dampening("Dampening", 0.1f, 0f, 1f, 1),
     ImgScale("Image Scale", 0.2f, 0f, 1f, 1),
