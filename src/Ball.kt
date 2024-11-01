@@ -37,11 +37,13 @@ class Ball {
             velocity.x *= -(1 - parameters[FloatValue.Dampening])
         }
 
-        // ball collision
+        // ball interactions
         for (other in grid.getNeighborBalls(position)) {
             if (other == this) continue
 
             val disp = other.position - position
+
+            // collision
             val minDist = parameters[FloatValue.BallRadius] * 2
             if (disp.mag() < minDist) {
                 val target = position + disp.setMag(minDist)
@@ -50,6 +52,13 @@ class Ball {
                 f += df
                 velocity -= f
                 other.velocity += f
+            }
+
+            // stickiness
+            if (parameters[FloatValue.BallStick] > 0) {
+                val target = position
+                val f = (target - other.position) * parameters[FloatValue.BallStick]
+                velocity -= f
             }
         }
 
