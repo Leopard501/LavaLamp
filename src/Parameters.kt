@@ -9,7 +9,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallRed("Red", 1f, 0f, 1f, 1),
     BallGreen("Green", 0f, 0f, 1f, 1),
     BallBlue("Blue", 0f, 0f, 1f, 1),
-    BallAlpha("Alpha", 100f, 0f, 255f, 1),
+    BallAlpha("Alpha", 255f, 0f, 255f, 1),
     BallCount("Ball Count", 20f, 1f, 2500f, 3),
     BallRadius("Ball Radius", 50f, 1f, 100f, 1),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2),
@@ -26,6 +26,20 @@ enum class BooleanValues(val id: String, val initial: Boolean) {
     ShowLava("Show Lava", false),
     ClampLava("Clamp Lava", false),
     ShowGrid("Show Grid", false),
+    ShowBackground("Show Background", true),
+}
+
+open class Mode(val next: Mode?, val id: String)
+
+enum class EnumValues(val id: String, val initial: Mode) {
+    DisplayMode("Display Mode", DisplayModeValues.Normal);
+
+    sealed class DisplayModeValues(next: Mode?, modeId: String): Mode(next, modeId) {
+        data object Normal : DisplayModeValues(Grid, "Normal")
+        data object Grid : DisplayModeValues(StickForce, "Grid")
+        data object StickForce : DisplayModeValues(Velocity, "Stick Force")
+        data object Velocity : DisplayModeValues(null, "Velocity")
+    }
 }
 
 class Parameters {
@@ -96,12 +110,43 @@ class Parameters {
         }
     }
 
+    class Picker(
+        val height: Float,
+        private val parameter: Parameter<Mode>,
+        private val value: EnumValues,
+    ) {
+        fun display() {
+            val areaWidth = app.width - parameters.bounds.second.x
+            val start = parameters.bounds.second.x + 0.1f * areaWidth
+
+            app.textAlign(PConstants.LEFT)
+            app.fill(0f)
+            app.text("${value.id}: ", start, height)
+            app.fill(parameters.ballColor.rgb)
+            val p = start + app.textWidth("${value.id}: ")
+            app.text(parameter.get().id, p, height)
+        }
+
+        fun update() {
+            if (!(mousePressedPulse &&
+                        app.mouseX > parameters.bounds.second.x &&
+                        app.mouseY > height - 10f &&
+                        app.mouseY < height + 10f))
+                return
+
+            if (parameter.get().next != null) {
+                parameter.set(parameter.get().next!!)
+            } else {
+                parameter.set(value.initial)
+            }
+        }
+    }
+
     class Checkbox(
-        private val height: Float,
+        val height: Float,
         private val v: Parameter<Boolean>,
         private val name: String
     ) {
-
         fun display() {
             val areaWidth = app.width - parameters.bounds.second.x
             val start = parameters.bounds.second.x + 0.1f * areaWidth
@@ -128,18 +173,21 @@ class Parameters {
         }
     }
 
-    var floatValue = EnumMap(FloatValue.entries.associateWith { Parameter(it.initial) })
+    var floatValues = EnumMap(FloatValue.entries.associateWith { Parameter(it.initial) })
     var booleanValues = EnumMap(BooleanValues.entries.associateWith { Parameter(it.initial) })
+    var enumValues = EnumMap(EnumValues.entries.associateWith { Parameter(it.initial) })
 
     var ballColor = getColor()
     var bounds = Pair(PVector(0f, 0f), PVector(900f, 900f))
 
-    private val sliders = floatValue.map {
+    private val sliders = floatValues.map {
         e -> Slider((e.key.ordinal + 1) * 40f, e.value, e.key)
     }
-
+    private val pickers = enumValues.map {
+        e -> Picker((sliders.last().height + (e.key.ordinal + 2) * 20f), e.value, e.key)
+    }
     private val checkboxes = booleanValues.map {
-        e -> Checkbox(sliders.last().height + (e.key.ordinal + 2) * 20f, e.value, e.key.id)
+        e -> Checkbox(pickers.last().height + (e.key.ordinal + 1) * 20f, e.value, e.key.id)
     }
 
     var sliderHeld = false
@@ -147,26 +195,31 @@ class Parameters {
     fun display() {
         sliders.forEach { slider -> slider.display() }
         checkboxes.forEach { checkbox -> checkbox.display() }
+        pickers.forEach { picker -> picker.display() }
     }
 
     fun update() {
         sliders.forEach { slider -> slider.update() }
         checkboxes.forEach { checkbox -> checkbox.update() }
+        pickers.forEach { picker -> picker.update() }
 
         ballColor = getColor()
     }
 
     private fun getColor(): Color {
         return Color(
-            floatValue.getValue(FloatValue.BallRed).get(),
-            floatValue.getValue(FloatValue.BallGreen).get(),
-            floatValue.getValue(FloatValue.BallBlue).get(),
+            floatValues.getValue(FloatValue.BallRed).get(),
+            floatValues.getValue(FloatValue.BallGreen).get(),
+            floatValues.getValue(FloatValue.BallBlue).get(),
         )
     }
 
     operator fun get(key: FloatValue): Float =
-        floatValue.getValue(key).get()
+        floatValues.getValue(key).get()
 
     operator fun get(key: BooleanValues): Boolean =
         booleanValues.getValue(key).get()
+
+    operator fun get(key: EnumValues): Mode =
+        enumValues.getValue(key).get()
 }

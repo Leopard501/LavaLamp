@@ -1,8 +1,8 @@
 import processing.core.PApplet
 import processing.core.PVector
+import java.awt.Color
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.pow
 
 var app = Main()
 
@@ -51,7 +51,7 @@ class Main: PApplet() {
     private fun update() {
         balls.forEach { ball -> ball.update() }
 
-        val oldFloats = EnumMap(parameters.floatValue.map { Pair(it.key, it.value.get()) }.toMap())
+        val oldFloats = EnumMap(parameters.floatValues.map { Pair(it.key, it.value.get()) }.toMap())
         val oldBooleans = EnumMap(parameters.booleanValues.map { Pair(it.key, it.value.get()) }.toMap())
         parameters.update()
 
@@ -83,11 +83,13 @@ class Main: PApplet() {
     }
 
     private fun display() {
-        background(100)
+        if (parameters[BooleanValues.ShowBackground]) background(100)
         fill(255)
         noStroke()
-        rect(parameters.bounds.first.x, parameters.bounds.first.y,
-            parameters.bounds.second.x, parameters.bounds.second.y)
+        if (parameters[BooleanValues.ShowBackground]) {
+            rect(parameters.bounds.first.x, parameters.bounds.first.y,
+                parameters.bounds.second.x, parameters.bounds.second.y)
+        }
 
         if (parameters[BooleanValues.ShowLava])
             lava.display()
@@ -135,4 +137,20 @@ fun min(v1: PVector, v2: PVector): PVector {
     } else {
         v2
     }
+}
+
+operator fun Color.plus(c: Color): Color {
+    return Color(
+        (this.red / 255f + c.red / 255f).coerceIn(0f, 1f),
+        (this.green / 255f + c.green / 255f).coerceIn(0f, 1f),
+        (this.blue / 255f + c.blue / 255f).coerceIn(0f, 1f)
+    )
+}
+
+operator fun Color.times(n: Float): Color {
+    return Color(
+        ((this.red / 255f) * n).coerceIn(0f, 1f),
+        ((this.green / 255f) * n).coerceIn(0f, 1f),
+        ((this.blue / 255f) * n).coerceIn(0f, 1f),
+    )
 }

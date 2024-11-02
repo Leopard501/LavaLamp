@@ -2,6 +2,7 @@ import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PVector
 import java.awt.Color
+import kotlin.math.abs
 import kotlin.math.pow
 
 class Ball {
@@ -14,7 +15,7 @@ class Ball {
         parameters[FloatValue.BallStartingVel]))
     private var cell: Grid.Cell? = null
 
-    private var test = PVector(0f, 0f)
+    private var stickForce = PVector(0f, 0f)
 
     fun update() {
         // basic movement
@@ -63,7 +64,7 @@ class Ball {
             if (parameters[FloatValue.BallStick] > 0) {
                 val dist = ((position - other.position).mag() / parameters[FloatValue.BallRadius]).coerceAtLeast(1f)
                 val f = (position - other.position).setMag(1 / dist.pow(2)) * parameters[FloatValue.BallStick]
-                test = f
+                stickForce = f
                 velocity -= f
             }
         }
@@ -82,16 +83,28 @@ class Ball {
 
     fun display() {
         app.noStroke()
-        if (parameters[BooleanValues.ShowGrid]) {
-            app.fill(grid.colorize(position).rgb)
-        } else {
-            val testColor = PApplet.lerpColor(Color.BLUE.rgb, Color.RED.rgb,
-                test.mag() / parameters[FloatValue.BallStick], PConstants.RGB)
-
-            app.fill(testColor, parameters[FloatValue.BallAlpha])
+        val c = when (parameters[EnumValues.DisplayMode]) {
+            EnumValues.DisplayModeValues.Normal -> parameters.ballColor.rgb
+            EnumValues.DisplayModeValues.Grid -> grid.colorize(position).rgb
+            EnumValues.DisplayModeValues.Velocity -> {
+                (Color.RED * (-velocity.y / 10f) +
+                        Color.BLUE * (velocity.y / 10f) +
+                        Color.MAGENTA * (-velocity.x / 10f) +
+                        Color.GREEN * (velocity.x / 10f)).rgb
+            }
+            EnumValues.DisplayModeValues.StickForce -> {
+                PApplet.lerpColor(
+                    Color.BLUE.rgb, Color.RED.rgb,
+                    stickForce.mag() / parameters[FloatValue.BallStick], PConstants.RGB
+                )
+            } else -> {
+                parameters.ballColor.rgb
+            }
         }
+        app.fill(c, parameters[FloatValue.BallAlpha])
         app.circle(position.x, position.y, parameters[FloatValue.BallRadius] * 2)
 
-//        app.text(test.toString(), position.x, position.y)
+//        app.fill(0)
+//        app.text("${velocity.y / 10f}, ${-velocity.y / 10f}", position.x, position.y)
     }
 }
