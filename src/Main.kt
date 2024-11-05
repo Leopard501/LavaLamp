@@ -105,7 +105,7 @@ class Main: PApplet() {
         parameters.display()
 
         if (saving) {
-            val fileName = "${File("").absolutePath}/images/img_${day()}_${minute()}_${second()}.png"
+            val fileName = "${File("").absolutePath}/images/img_${hour()}_${minute()}_${second()}.png"
             save(fileName)
             saving = false
         }
@@ -131,22 +131,6 @@ operator fun PVector.minus(v: PVector): PVector {
 
 operator fun PVector.times(n: Float): PVector {
     return PVector.mult(this, n)
-}
-
-fun max(v1: PVector, v2: PVector): PVector {
-    return if (v1.mag() > v1.mag()) {
-        v1
-    } else {
-        v2
-    }
-}
-
-fun min(v1: PVector, v2: PVector): PVector {
-    return if (v1.mag() < v1.mag()) {
-        v1
-    } else {
-        v2
-    }
 }
 
 operator fun Color.plus(c: Color): Color {
