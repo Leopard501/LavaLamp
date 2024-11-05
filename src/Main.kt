@@ -1,6 +1,7 @@
 import processing.core.PApplet
 import processing.core.PVector
 import java.awt.Color
+import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -9,10 +10,13 @@ var app = Main()
 var mousePressedPulse = false
 var mouseReleasedPulse = false
 
-lateinit var parameters: Parameters
 val balls: ArrayList<Ball> = ArrayList()
+
+lateinit var parameters: Parameters
 lateinit var lava: Lava
 lateinit var grid: Grid
+
+var saving = false
 
 fun main() {
     PApplet.main("Main")
@@ -22,7 +26,7 @@ class Main: PApplet() {
 
     override fun settings() {
         size(1100, 900)
-        noSmooth()
+//        noSmooth()
 
         app = this
     }
@@ -99,6 +103,12 @@ class Main: PApplet() {
             grid.display()
 
         parameters.display()
+
+        if (saving) {
+            val fileName = "${File("").absolutePath}/images/img_${day()}_${minute()}_${second()}.png"
+            save(fileName)
+            saving = false
+        }
     }
 
     override fun mousePressed() {

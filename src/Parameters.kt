@@ -173,6 +173,32 @@ class Parameters {
         }
     }
 
+    class Button(
+        val height: Float,
+        private val action: () -> Unit,
+        private val name: String,
+    ) {
+        fun display() {
+            val areaWidth = app.width - parameters.bounds.second.x
+            val start = parameters.bounds.second.x + 0.1f * areaWidth
+
+            app.textAlign(PConstants.LEFT)
+            app.fill(0f)
+            app.fill(parameters.ballColor.rgb)
+            app.text(name, start, height)
+        }
+
+        fun update() {
+            if (!(mousePressedPulse &&
+                        app.mouseX > parameters.bounds.second.x &&
+                        app.mouseY > height - 10f &&
+                        app.mouseY < height + 10f))
+                return
+
+            action.invoke()
+        }
+    }
+
     var floatValues = EnumMap(FloatValue.entries.associateWith { Parameter(it.initial) })
     var booleanValues = EnumMap(BooleanValues.entries.associateWith { Parameter(it.initial) })
     var enumValues = EnumMap(EnumValues.entries.associateWith { Parameter(it.initial) })
@@ -189,6 +215,9 @@ class Parameters {
     private val checkboxes = booleanValues.map {
         e -> Checkbox(pickers.last().height + (e.key.ordinal + 1) * 20f, e.value, e.key.id)
     }
+    private val buttons = arrayOf(
+        Button(checkboxes.last().height + 20f, { saving = true }, "Save"),
+    )
 
     var sliderHeld = false
 
@@ -201,12 +230,14 @@ class Parameters {
         sliders.forEach { slider -> slider.display() }
         checkboxes.forEach { checkbox -> checkbox.display() }
         pickers.forEach { picker -> picker.display() }
+        buttons.forEach { button -> button.display() }
     }
 
     fun update() {
         sliders.forEach { slider -> slider.update() }
         checkboxes.forEach { checkbox -> checkbox.update() }
         pickers.forEach { picker -> picker.update() }
+        buttons.forEach { button -> button.update() }
 
         ballColor = getColor()
     }
