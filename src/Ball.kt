@@ -66,6 +66,7 @@ class Ball {
                 val f = (position - other.position).setMag(1 / dist.pow(2)) * parameters[FloatValue.BallStick]
                 stickForce = f
                 velocity -= f
+                other.velocity += f
             }
         }
 
