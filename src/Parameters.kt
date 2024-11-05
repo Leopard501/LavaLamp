@@ -193,6 +193,11 @@ class Parameters {
     var sliderHeld = false
 
     fun display() {
+        app.noStroke()
+        app.fill(100f)
+        val areaWidth = app.width - parameters.bounds.second.x
+        app.rect(parameters.bounds.second.x, 0f, parameters.bounds.second.x + areaWidth, app.height.toFloat())
+
         sliders.forEach { slider -> slider.display() }
         checkboxes.forEach { checkbox -> checkbox.display() }
         pickers.forEach { picker -> picker.display() }
