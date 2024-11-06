@@ -70,6 +70,21 @@ class Ball {
             }
         }
 
+        // mouse interaction
+        if (parameters[FloatValue.MouseForce] > 0 && app.mousePressed && app.mouseX < parameters.bounds.second.x) {
+            val mousePos = PVector(app.mouseX.toFloat(), app.mouseY.toFloat())
+            val dist = ((position - mousePos).mag() / parameters[FloatValue.BallRadius]).coerceAtLeast(1f)
+            val mag = when (parameters[EnumValues.MouseForceType]) {
+                EnumValues.ForceTypeValues.Inverse -> 1f / dist
+                EnumValues.ForceTypeValues.Linear -> dist / 100f
+                EnumValues.ForceTypeValues.InverseSquared -> 1f / dist.pow(2)
+                else -> {-dist}
+            }
+            var f = (position - mousePos).setMag(mag) * parameters[FloatValue.MouseForce]
+            if (parameters[BooleanValues.InvertMouseForce]) f *= -1f
+            velocity -= f
+        }
+
         assignCell()
     }
 

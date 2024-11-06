@@ -10,8 +10,8 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallGreen("Green", 0f, 0f, 1f, 1),
     BallBlue("Blue", 0f, 0f, 1f, 1),
     BallAlpha("Alpha", 255f, 0f, 255f, 1),
-    BallCount("Ball Count", 20f, 1f, 2500f, 3),
-    BallRadius("Ball Radius", 50f, 1f, 100f, 1),
+    BallCount("Ball Count", 80f, 1f, 2500f, 3),
+    BallRadius("Ball Radius", 15f, 1f, 100f, 1),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2),
     BallSpring("Springiness", 0.05f, 0f, 1f, 2),
     BallStick("Stickiness", 0.05f, 0f, 1f, 2),
@@ -19,6 +19,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     Dampening("Dampening", 0.1f, 0f, 1f, 1),
     ImgScale("Image Scale", 0.2f, 0f, 1f, 1),
     LavaScale("Lava Scale", 50f, 1f, 500f, 1),
+    MouseForce("Mouse Force", 1f, 0f, 10f, 2),
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
@@ -27,18 +28,26 @@ enum class BooleanValues(val id: String, val initial: Boolean) {
     ClampLava("Clamp Lava", false),
     ShowGrid("Show Grid", false),
     ShowBackground("Show Background", true),
+    InvertMouseForce("Invert Mouse Force", false),
 }
 
 open class Mode(val next: Mode?, val id: String)
 
 enum class EnumValues(val id: String, val initial: Mode) {
-    DisplayMode("Display Mode", DisplayModeValues.Normal);
+    DisplayMode("Display Mode", DisplayModeValues.Normal),
+    MouseForceType("Mouse Force Type", ForceTypeValues.Inverse);
 
     sealed class DisplayModeValues(next: Mode?, modeId: String): Mode(next, modeId) {
-        data object Normal : DisplayModeValues(Grid, "Normal")
-        data object Grid : DisplayModeValues(StickForce, "Grid")
-        data object StickForce : DisplayModeValues(Velocity, "Stick Force")
-        data object Velocity : DisplayModeValues(null, "Velocity")
+        data object Normal: DisplayModeValues(Grid, "Normal")
+        data object Grid: DisplayModeValues(StickForce, "Grid")
+        data object StickForce: DisplayModeValues(Velocity, "Stick Force")
+        data object Velocity: DisplayModeValues(null, "Velocity")
+    }
+
+    sealed class ForceTypeValues(next: Mode?, modeId: String): Mode(next, modeId) {
+        data object Inverse: ForceTypeValues(Linear, "Inverse")
+        data object Linear: ForceTypeValues(InverseSquared, "Linear")
+        data object InverseSquared: ForceTypeValues(null, "Inverse Squared")
     }
 }
 
