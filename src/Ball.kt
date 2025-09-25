@@ -2,7 +2,6 @@ import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PVector
 import java.awt.Color
-import kotlin.math.abs
 import kotlin.math.pow
 
 class Ball {
