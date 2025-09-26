@@ -118,8 +118,5 @@ class Ball {
         }
         app.fill(c, parameters[FloatValue.BallAlpha])
         app.circle(position.x, position.y, parameters[FloatValue.BallRadius] * 2)
-
-//        app.fill(0)
-//        app.text("${velocity.y / 10f}, ${-velocity.y / 10f}", position.x, position.y)
     }
 }

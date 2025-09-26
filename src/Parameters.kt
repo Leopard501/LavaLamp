@@ -25,23 +25,19 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallRed("Red", 1f, 0f, 1f, 1),
     BallGreen("Green", 0f, 0f, 1f, 1),
     BallBlue("Blue", 0f, 0f, 1f, 1),
-    BallAlpha("Alpha", 180f, 0f, 255f, 1),
-    BallCount("Ball Count", 80f, 1f, 1000f, 3),
-    BallRadius("Ball Radius", 10f, 5f, 40f, 1),
+    BallAlpha("Alpha", 180f, 5f, 255f, 1),
+    BallCount("Ball Count", 80f, 10f, 1000f, 3),
+    BallRadius("Ball Radius", 10f, 5f, 30f, 1),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2),
     BallSpring("Springiness", 0.05f, 0f, 1f, 2),
     BallStick("Stickiness", 0.05f, 0f, 1f, 2),
     Gravity("Gravity", 0.1f, 0f, 1f, 2),
     Dampening("Dampening", 0.1f, 0f, 1f, 1),
-    ImgScale("Image Scale", 0.2f, 0f, 1f, 1),
-    LavaScale("Lava Scale", 50f, 1f, 500f, 1),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2),
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
     ShowBalls("Show Balls", true),
-    ShowLava("Show Lava", false),
-    ClampLava("Clamp Lava", false),
     ShowGrid("Show Grid", false),
     ShowBackground("Show Background", false),
     InvertMouseForce("Invert Mouse Force", false),
@@ -269,7 +265,6 @@ class Parameters {
     private val buttons = arrayOf(
         Button(checkboxes.last().height + 20f, { saving = true }, "Save"),
         Button(checkboxes.last().height + 40f, {
-//            associations = associations.keys.zip(associations.values.shuffled()).toMap()
             associations = associations.mapValues {
                 MusicParameter.entries[app.random(MusicParameter.entries.size.toFloat()).toInt()]
             }

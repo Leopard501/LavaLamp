@@ -17,7 +17,6 @@ var mouseReleasedPulse = false
 val balls: ArrayList<Ball> = ArrayList()
 
 lateinit var parameters: Parameters
-lateinit var lava: Lava
 lateinit var grid: Grid
 
 var saving = false
@@ -106,7 +105,6 @@ class Main: PApplet() {
         }
         grid = Grid()
         balls.forEach { ball -> ball.assignCell() }
-        lava = Lava()
 
         // initialize to black
         fill(0f)
@@ -128,7 +126,7 @@ class Main: PApplet() {
         balls.forEach { ball -> ball.update() }
 
         val oldFloats = EnumMap(parameters.floatValues.map { Pair(it.key, it.value.get()) }.toMap())
-        val oldBooleans = EnumMap(parameters.booleanValues.map { Pair(it.key, it.value.get()) }.toMap())
+        EnumMap(parameters.booleanValues.map { Pair(it.key, it.value.get()) }.toMap())
         parameters.update()
 
         val newCount = parameters[FloatValue.BallCount].toInt()
@@ -146,15 +144,9 @@ class Main: PApplet() {
             }
         }
 
-        if (oldFloats.getValue(FloatValue.BallRadius) != parameters[FloatValue.BallRadius] ||
-            oldFloats.getValue(FloatValue.LavaScale) != parameters[FloatValue.LavaScale] ||
-            oldBooleans.getValue(BooleanValues.ShowLava) != parameters[BooleanValues.ShowLava]) {
+        if (oldFloats.getValue(FloatValue.BallRadius) != parameters[FloatValue.BallRadius]) {
             grid = Grid()
             balls.forEach { ball -> ball.assignCell() }
-        }
-
-        if (parameters[BooleanValues.ShowLava]) {
-            lava = Lava()
         }
     }
 
@@ -167,8 +159,6 @@ class Main: PApplet() {
                 parameters.bounds.second.x, parameters.bounds.second.y)
         }
 
-        if (parameters[BooleanValues.ShowLava])
-            lava.display()
         if (parameters[BooleanValues.ShowBalls])
             balls.forEach { ball -> ball.display() }
         if (parameters[BooleanValues.ShowGrid])
