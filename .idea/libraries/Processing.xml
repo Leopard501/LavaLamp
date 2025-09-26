@@ -1,13 +1,12 @@
 <component name="libraryTable">
-  <library name="Processing">
+  <library name="processing">
     <CLASSES>
-      <root url="file:///Applications/Processing 4.app/Contents/Java/core/library" />
+      <root url="file://$USER_HOME$/Documents/Processing/libraries/sound/library" />
+      <root url="file://$USER_HOME$/Documents/P4 Contents/app/resources/core/library" />
     </CLASSES>
     <JAVADOC />
-    <NATIVE>
-      <root url="file:///Applications/Processing 4.app/Contents/Java/core/library/macos-x86_64" />
-    </NATIVE>
     <SOURCES />
-    <jarDirectory url="file:///Applications/Processing 4.app/Contents/Java/core/library" recursive="false" />
+    <jarDirectory url="file://$USER_HOME$/Documents/P4 Contents/app/resources/core/library" recursive="false" />
+    <jarDirectory url="file://$USER_HOME$/Documents/Processing/libraries/sound/library" recursive="false" />
   </library>
 </component>

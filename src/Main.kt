@@ -60,29 +60,36 @@ class Beat() {
     fun update() {
         threshold *= thresholdScale
     }
+
+    fun getBpm(): Float {
+        if (beats.isEmpty() || delays.sum() <= 0) return 0f
+        return 60_000 / (delays.sum() / delays.size.toFloat())
+    }
 }
 
 class Main: PApplet() {
 
     val bands = 16
     val fadeRate = 0.99f
+    val slowFadeRate = 0.998f
     val weights = FloatArray(bands) { i -> (i + 1f).pow(2.4f) }
 
     lateinit var soundInp: AudioIn
     lateinit var soundAmp: Amplitude
     lateinit var soundFft: FFT
 
-    lateinit var beats: Array<Beat>
+    lateinit var beatsFft: Array<Beat>
+    var avgBpm = 0f
 
     var amp = 0f
     var fft: FloatArray = FloatArray(bands) { 0f }
     var fadeAmp = 0f
+    var slowFaceAmp = 0f
     var fadeFft: FloatArray = FloatArray(bands) { 0f }
-    var soundColor = Color.BLACK
+    var soundColor: Color = Color.BLACK
 
     override fun settings() {
         size(1100, 900)
-//        noSmooth()
 
         app = this
     }
@@ -100,6 +107,11 @@ class Main: PApplet() {
         grid = Grid()
         balls.forEach { ball -> ball.assignCell() }
         lava = Lava()
+
+        // initialize to black
+        fill(0f)
+        rect(parameters.bounds.first.x, parameters.bounds.first.y,
+            parameters.bounds.second.x, parameters.bounds.second.y)
     }
 
     override fun draw() {
@@ -148,7 +160,7 @@ class Main: PApplet() {
 
     private fun display() {
         if (parameters[BooleanValues.ShowBackground]) background(100)
-        fill(soundColor.rgb)
+        fill(0f)
         noStroke()
         if (parameters[BooleanValues.ShowBackground]) {
             rect(parameters.bounds.first.x, parameters.bounds.first.y,
@@ -174,7 +186,7 @@ class Main: PApplet() {
     fun soundSetup() {
         soundAmp = Amplitude(this)
         soundFft = FFT(this, bands)
-        beats = Array(bands) { Beat() }
+        beatsFft = Array(bands) { Beat() }
 
         soundInp = AudioIn(this, 0)
         soundInp.start()
@@ -187,21 +199,23 @@ class Main: PApplet() {
         // amp
         amp = soundAmp.analyze()
         fadeAmp = max(amp, fadeAmp * fadeRate)
+        slowFaceAmp = max(fadeAmp, slowFaceAmp * slowFadeRate)
 
         // fft
         var f = FloatArray(bands) { 0f }
         soundFft.analyze(f)
         f = f.mapIndexed { i, e -> e * weights[i] }.toFloatArray()
-        if (f.last() < 0.001f || f.last() / fft.last() < 50) { // catch noise
+        if (f.last() < 0.01f || f.last() / fft.last() < 50) { // catch noise
             fft = f
         }
         fadeFft = fadeFft.mapIndexed { i, e -> max(fft[i], e * fadeRate) }.toFloatArray()
 
-        // beat
+        // beats fft
         fadeFft.forEachIndexed {
-            i, it -> beats[i].push(it, millis())
+            i, it -> beatsFft[i].push(it, millis())
         }
-        beats.forEach { it.update() }
+        beatsFft.forEach { it.update() }
+        avgBpm = beatsFft.map { it.getBpm() }.sum() / beatsFft.size
 
         // color
         soundColor = Color.BLACK
