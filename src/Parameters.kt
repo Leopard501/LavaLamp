@@ -113,6 +113,8 @@ class Parameters {
                 "Gravity" -> parameter.set(((app.avgBpm - 30) / 120).coerceIn(0f, 1f))
                 "Starting Velocity" -> parameter.set((((app.avgBpm - 30) / 120) * 50f).coerceIn(0f, 50f))
                 "Ball Count" -> parameter.set((app.slowFaceAmp * 1000).coerceIn(1f, 1000f))
+                "Springiness" -> parameter.set(app.soundColor.red / 255f)
+                "Stickiness" -> parameter.set(app.soundColor.blue / 255f)
             }
 
             if (held) {
