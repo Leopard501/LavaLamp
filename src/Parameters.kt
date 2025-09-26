@@ -9,8 +9,16 @@ enum class MusicParameter(val scale: () -> Float) {
     Red({ app.soundColor.red / 255f }),
     Green({ app.soundColor.green / 255f }),
     Blue({ app.soundColor.blue / 255f }),
-    Bpm({ ((app.avgBpm - 30) / 120) }),
+    Bpm({ (app.avgBpm - 30) / 120 }),
     SlowAmp({ app.slowFadeAmp }),
+    Amp( { app.fadeAmp } ),
+    Low( { 0.1f } ),
+    High( { 0.9f }),
+    Minimum( { 0f } ),
+    Maximum( { 0f } ),
+    InverseAmp({ 1 - app.fadeAmp }),
+    InverseBpm({ (1 - (app.avgBpm - 30) / 120) }),
+    InverseSlowAmp({ 1 - app.slowFadeAmp }),
 }
 
 enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int) {
@@ -19,7 +27,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallBlue("Blue", 0f, 0f, 1f, 1),
     BallAlpha("Alpha", 180f, 0f, 255f, 1),
     BallCount("Ball Count", 80f, 1f, 1000f, 3),
-    BallRadius("Ball Radius", 10f, 1f, 100f, 1),
+    BallRadius("Ball Radius", 10f, 5f, 40f, 1),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2),
     BallSpring("Springiness", 0.05f, 0f, 1f, 2),
     BallStick("Stickiness", 0.05f, 0f, 1f, 2),
@@ -61,6 +69,22 @@ enum class EnumValues(val id: String, val initial: Mode) {
 }
 
 class Parameters {
+
+    companion object {
+        var associations = mapOf(
+            Pair("Red", MusicParameter.Red),
+            Pair("Green", MusicParameter.Green),
+            Pair("Blue", MusicParameter.Blue),
+            Pair("Alpha", MusicParameter.High),
+            Pair("Ball Count", MusicParameter.SlowAmp),
+            Pair("Ball Radius", MusicParameter.Low),
+            Pair("Starting Velocity", MusicParameter.Bpm),
+            Pair("Springiness", MusicParameter.Red),
+            Pair("Stickiness", MusicParameter.Blue),
+            Pair("Gravity", MusicParameter.Bpm),
+            Pair("Dampening", MusicParameter.Low),
+        )
+    }
 
     data class Parameter<T>(private var v: T) {
         fun get(): T {
@@ -114,17 +138,7 @@ class Parameters {
                 parameters.sliderHeld = false
             }
 
-            if (parameters[BooleanValues.MusicMode]) parameter.set(when (value.id) {
-                "Red" -> scale(MusicParameter.Red)
-                "Green" -> scale(MusicParameter.Green)
-                "Blue" -> scale(MusicParameter.Blue)
-                "Gravity" -> scale(MusicParameter.Bpm)
-                "Starting Velocity" -> scale(MusicParameter.Bpm)
-                "Ball Count" -> scale(MusicParameter.SlowAmp)
-                "Springiness" -> scale(MusicParameter.Red)
-                "Stickiness" -> scale(MusicParameter.Blue)
-                else -> parameter.get()
-            })
+            if (parameters[BooleanValues.MusicMode]) musicScale(associations[value.id])
 
             if (held) {
                 val areaWidth = app.width - parameters.bounds.second.x
@@ -140,8 +154,10 @@ class Parameters {
             }
         }
 
-        fun scale(parameter: MusicParameter): Float {
-            return ((value.max - value.min) * parameter.scale() + value.min).coerceIn(value.min, value.max)
+        fun musicScale(music: MusicParameter?) {
+            parameter.set(if (music != null) {
+                ((value.max - value.min) * music.scale() + value.min).coerceIn(value.min, value.max)
+            } else parameter.get())
         }
     }
 
@@ -252,6 +268,12 @@ class Parameters {
     }
     private val buttons = arrayOf(
         Button(checkboxes.last().height + 20f, { saving = true }, "Save"),
+        Button(checkboxes.last().height + 40f, {
+//            associations = associations.keys.zip(associations.values.shuffled()).toMap()
+            associations = associations.mapValues {
+                MusicParameter.entries[app.random(MusicParameter.entries.size.toFloat()).toInt()]
+            }
+        }, "Shuffle"),
     )
 
     var sliderHeld = false
