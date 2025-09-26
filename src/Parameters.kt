@@ -5,12 +5,20 @@ import java.awt.Color
 import java.util.*
 import kotlin.math.pow
 
+enum class MusicParameter(val scale: () -> Float) {
+    Red({ app.soundColor.red / 255f }),
+    Green({ app.soundColor.green / 255f }),
+    Blue({ app.soundColor.blue / 255f }),
+    Bpm({ ((app.avgBpm - 30) / 120) }),
+    SlowAmp({ app.slowFadeAmp }),
+}
+
 enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int) {
     BallRed("Red", 1f, 0f, 1f, 1),
     BallGreen("Green", 0f, 0f, 1f, 1),
     BallBlue("Blue", 0f, 0f, 1f, 1),
     BallAlpha("Alpha", 180f, 0f, 255f, 1),
-    BallCount("Ball Count", 80f, 1f, 2500f, 3),
+    BallCount("Ball Count", 80f, 1f, 1000f, 3),
     BallRadius("Ball Radius", 10f, 1f, 100f, 1),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2),
     BallSpring("Springiness", 0.05f, 0f, 1f, 2),
@@ -106,16 +114,17 @@ class Parameters {
                 parameters.sliderHeld = false
             }
 
-            if (parameters[BooleanValues.MusicMode]) when (value.id) {
-                "Red" -> parameter.set(app.soundColor.red / 255f)
-                "Green" -> parameter.set(app.soundColor.green / 255f)
-                "Blue" -> parameter.set(app.soundColor.blue / 255f)
-                "Gravity" -> parameter.set(((app.avgBpm - 30) / 120).coerceIn(0f, 1f))
-                "Starting Velocity" -> parameter.set((((app.avgBpm - 30) / 120) * 50f).coerceIn(0f, 50f))
-                "Ball Count" -> parameter.set((app.slowFaceAmp * 1000).coerceIn(1f, 1000f))
-                "Springiness" -> parameter.set(app.soundColor.red / 255f)
-                "Stickiness" -> parameter.set(app.soundColor.blue / 255f)
-            }
+            if (parameters[BooleanValues.MusicMode]) parameter.set(when (value.id) {
+                "Red" -> scale(MusicParameter.Red)
+                "Green" -> scale(MusicParameter.Green)
+                "Blue" -> scale(MusicParameter.Blue)
+                "Gravity" -> scale(MusicParameter.Bpm)
+                "Starting Velocity" -> scale(MusicParameter.Bpm)
+                "Ball Count" -> scale(MusicParameter.SlowAmp)
+                "Springiness" -> scale(MusicParameter.Red)
+                "Stickiness" -> scale(MusicParameter.Blue)
+                else -> parameter.get()
+            })
 
             if (held) {
                 val areaWidth = app.width - parameters.bounds.second.x
@@ -129,6 +138,10 @@ class Parameters {
                     s.pow(value.scale) * (value.max - value.min) + value.min
                 )
             }
+        }
+
+        fun scale(parameter: MusicParameter): Float {
+            return ((value.max - value.min) * parameter.scale() + value.min).coerceIn(value.min, value.max)
         }
     }
 
