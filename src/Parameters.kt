@@ -36,6 +36,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     Gravity("Gravity", 0.1f, 0f, 1f, 2),
     Dampening("Dampening", 0.1f, 0f, 1f, 1),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2),
+    ShuffleSpeed("Shuffle Speed", 0f, 0f, 120f, 1),
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
@@ -266,11 +267,7 @@ class Parameters {
     }
     private val buttons = arrayOf(
         Button(checkboxes.last().height + 20f, { saving = true }, "Save"),
-        Button(checkboxes.last().height + 40f, {
-            associations = associations.mapValues {
-                MusicParameter.entries[app.random(MusicParameter.entries.size.toFloat()).toInt()]
-            }
-        }, "Shuffle"),
+        Button(checkboxes.last().height + 40f, { app.shuffleSound() }, "Shuffle"),
     )
 
     var sliderHeld = false

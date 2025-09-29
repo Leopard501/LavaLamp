@@ -1,3 +1,4 @@
+import Parameters.Companion.associations
 import processing.core.PApplet
 import processing.core.PVector
 import processing.sound.Amplitude
@@ -87,6 +88,8 @@ class Main: PApplet() {
     var slowFadeAmp = 0f
     var fadeFft: FloatArray = FloatArray(bands) { 0f }
     var soundColor: Color = Color.BLACK
+    var shuffleTime = 0
+    var delayedShuffleSpeed = 0f
 
     override fun settings() {
         size(1100, 900)
@@ -214,6 +217,25 @@ class Main: PApplet() {
         for ((i, band) in fadeFft.withIndex()) {
             val c = waveLengthToRGB(1 - ((i + 1) / bands.toFloat()))
             soundColor += c * band * (1 / bands.toFloat())
+        }
+
+        // reset shuffle time when value changed
+        if (delayedShuffleSpeed != parameters[FloatValue.ShuffleSpeed]) {
+            delayedShuffleSpeed = parameters[FloatValue.ShuffleSpeed]
+            shuffleTime = millis()
+        }
+
+        // auto shuffle
+        val shuffleTarget = parameters[FloatValue.ShuffleSpeed] * 1000
+        if (shuffleTarget > 1000 && millis() - shuffleTime > shuffleTarget) {
+            shuffleSound()
+            shuffleTime = millis()
+        }
+    }
+
+    fun shuffleSound() {
+        associations = associations.mapValues {
+            MusicParameter.entries[app.random(MusicParameter.entries.size.toFloat()).toInt()]
         }
     }
 
