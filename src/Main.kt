@@ -1,4 +1,3 @@
-import Parameters.Companion.associations
 import processing.core.PApplet
 import processing.core.PVector
 import processing.sound.Amplitude
@@ -235,8 +234,10 @@ class Main: PApplet() {
     }
 
     fun shuffleSound() {
-        associations = associations.mapValues {
-            MusicParameter.entries[app.random(MusicParameter.entries.size.toFloat()).toInt()]
+        FloatValue.entries.forEach {
+            if (it.musicParameter != null) {
+                it.musicParameter = MusicParameter.entries[app.random(MusicParameter.entries.size.toFloat()).toInt()]
+            }
         }
     }
 

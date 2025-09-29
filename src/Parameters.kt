@@ -23,20 +23,20 @@ enum class MusicParameter(val scale: () -> Float) {
     InverseSmoothAmp({ 1 - app.smoothAmp }),
 }
 
-enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int) {
-    BallRed("Red", 1f, 0f, 1f, 1),
-    BallGreen("Green", 0f, 0f, 1f, 1),
-    BallBlue("Blue", 0f, 0f, 1f, 1),
-    BallAlpha("Alpha", 180f, 5f, 255f, 1),
-    BallCount("Ball Count", 80f, 10f, 1000f, 3),
-    BallRadius("Ball Radius", 10f, 5f, 25f, 1),
-    BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2),
-    BallSpring("Springiness", 0.05f, 0f, 1f, 2),
-    BallStick("Stickiness", 0.05f, 0f, 1f, 2),
-    Gravity("Gravity", 0.1f, 0f, 1f, 2),
-    Dampening("Dampening", 0.1f, 0f, 1f, 1),
-    MouseForce("Mouse Force", 1f, 0f, 10f, 2),
-    ShuffleSpeed("Shuffle Speed", 0f, 0f, 120f, 1),
+enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int, var musicParameter: MusicParameter?) {
+    BallRed("Red", 1f, 0f, 1f, 1, MusicParameter.Red),
+    BallGreen("Green", 0f, 0f, 1f, 1, MusicParameter.Green),
+    BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameter.Blue),
+    BallAlpha("Alpha", 180f, 5f, 255f, 1, MusicParameter.High),
+    BallCount("Ball Count", 80f, 10f, 1000f, 3, MusicParameter.SlowAmp),
+    BallRadius("Ball Radius", 10f, 5f, 25f, 1, MusicParameter.Low),
+    BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2, MusicParameter.Bpm),
+    BallSpring("Springiness", 0.05f, 0f, 1f, 2, MusicParameter.Red),
+    BallStick("Stickiness", 0.05f, 0f, 1f, 2, MusicParameter.Blue),
+    Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameter.Bpm),
+    Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameter.Low),
+    MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
+    ShuffleSpeed("Shuffle Speed", 0f, 0f, 120f, 1, null),
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
@@ -69,22 +69,6 @@ enum class EnumValues(val id: String, val initial: Mode) {
 
 class Parameters {
 
-    companion object {
-        var associations = mapOf(
-            Pair("Red", MusicParameter.Red),
-            Pair("Green", MusicParameter.Green),
-            Pair("Blue", MusicParameter.Blue),
-            Pair("Alpha", MusicParameter.High),
-            Pair("Ball Count", MusicParameter.SlowAmp),
-            Pair("Ball Radius", MusicParameter.Low),
-            Pair("Starting Velocity", MusicParameter.Bpm),
-            Pair("Springiness", MusicParameter.Red),
-            Pair("Stickiness", MusicParameter.Blue),
-            Pair("Gravity", MusicParameter.Bpm),
-            Pair("Dampening", MusicParameter.Low),
-        )
-    }
-
     data class Parameter<T>(private var v: T) {
         fun get(): T {
             return v
@@ -102,9 +86,17 @@ class Parameters {
         private var held = false
 
         fun display() {
-            val areaWidth = app.width - parameters.bounds.second.x
+            val areaWidth = if (parameters[BooleanValues.MusicMode] && value.musicParameter != null) {
+                app.width - parameters.bounds.second.x - 100
+            } else {
+                app.width - parameters.bounds.second.x
+            }
             val start = parameters.bounds.second.x + 0.1f * areaWidth
-            val end = app.width - 0.1f * areaWidth
+            val end = if (parameters[BooleanValues.MusicMode] && value.musicParameter != null) {
+                app.width - 100 - 0.1f * areaWidth
+            } else {
+                app.width - 0.1f * areaWidth
+            }
             val s = ((parameter.get() - value.min) / (value.max - value.min)).pow(1 / value.scale.toFloat())
 
             app.stroke(0f)
@@ -122,11 +114,20 @@ class Parameters {
             app.text(parameter.get(),
                 start + areaWidth * 0.8f * s,
                 height + 15f)
+
+            // music parameter picker
+            if (!parameters[BooleanValues.MusicMode] || value.musicParameter == null) return
+            app.textAlign(PConstants.LEFT)
+            app.fill(parameters.ballColor.rgb)
+            app.text(value.musicParameter.toString(), end + 0.1f * areaWidth, height)
         }
 
         fun update() {
             if (!held && app.mousePressed &&
                 app.mouseX > parameters.bounds.second.x &&
+                if (parameters[BooleanValues.MusicMode] && value.musicParameter != null) {
+                    app.mouseX < app.width - 100
+                } else { true } &&
                 app.mouseY > height - 10f &&
                 app.mouseY < height + 10f &&
                 !parameters.sliderHeld) {
@@ -136,20 +137,43 @@ class Parameters {
                 held = false
                 parameters.sliderHeld = false
             }
+            val areaWidth = if (parameters[BooleanValues.MusicMode] && value.musicParameter != null) {
+                app.width - parameters.bounds.second.x - 100
+            } else {
+                app.width - parameters.bounds.second.x
+            }
+            val end = if (parameters[BooleanValues.MusicMode] && value.musicParameter != null) {
+                app.width - 100 - 0.1f * areaWidth
+            } else {
+                app.width - 0.1f * areaWidth
+            }
 
-            if (parameters[BooleanValues.MusicMode]) musicScale(associations[value.id])
+            if (parameters[BooleanValues.MusicMode]) musicScale(value.musicParameter)
 
             if (held) {
-                val areaWidth = app.width - parameters.bounds.second.x
                 val s = PApplet.map(
                     app.mouseX.toFloat(),
                     parameters.bounds.second.x + 0.1f * areaWidth,
-                    app.width - 0.1f * areaWidth,
+                    end,
                     0f, 1f
                 ).coerceIn(0f, 1f)
                 parameter.set(
                     s.pow(value.scale) * (value.max - value.min) + value.min
                 )
+            }
+
+            // music parameter picker
+            if (!parameters[BooleanValues.MusicMode] || value.musicParameter == null) return
+            if (!(mousePressedPulse &&
+                        app.mouseX > end + 0.1f * areaWidth &&
+                        app.mouseY > height - 10f &&
+                        app.mouseY < height + 10f))
+                return
+
+            if (value.musicParameter!!.ordinal < MusicParameter.entries.size-1) {
+                value.musicParameter = MusicParameter.entries[value.musicParameter!!.ordinal + 1]
+            } else {
+                value.musicParameter = MusicParameter.entries.first()
             }
         }
 
@@ -256,11 +280,11 @@ class Parameters {
     var ballColor = getColor()
     var bounds = Pair(
         PVector(0f, 0f),
-        PVector(app.width - 200f, app.height.toFloat())
+        PVector(app.width - 300f, app.height.toFloat())
     )
 
     private val sliders = floatValues.map {
-        e -> Slider((e.key.ordinal + 1) * 40f, e.value, e.key)
+        e -> Slider((e.key.ordinal + 1) * 40f, e.value, e.key, )
     }
     private val pickers = enumValues.map {
         e -> Picker((sliders.last().height + (e.key.ordinal + 2) * 20f), e.value, e.key)
