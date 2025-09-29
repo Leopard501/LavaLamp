@@ -83,6 +83,7 @@ class Main: PApplet() {
     var amp = 0f
     var fft: FloatArray = FloatArray(bands) { 0f }
     var fadeAmp = 0f
+    var smoothAmp = 0f
     var slowFadeAmp = 0f
     var fadeFft: FloatArray = FloatArray(bands) { 0f }
     var soundColor: Color = Color.BLACK
@@ -190,6 +191,7 @@ class Main: PApplet() {
         amp = soundAmp.analyze()
         fadeAmp = max(amp, fadeAmp * fadeRate)
         slowFadeAmp = max(fadeAmp, slowFadeAmp * slowFadeRate)
+        smoothAmp = (amp + smoothAmp) / 2
 
         // fft
         var f = FloatArray(bands) { 0f }
