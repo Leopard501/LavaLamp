@@ -16,7 +16,7 @@ enum class MusicParameter(val scale: () -> Float) {
     Low({ 0.1f }),
     High({ 0.9f }),
     Minimum({ 0f }),
-    Maximum({ 0f }),
+    Maximum({ 1f }),
     InverseAmp({ 1 - app.fadeAmp }),
     InverseBpm({ (1 - (app.avgBpm - 30) / 120) }),
     InverseSlowAmp({ 1 - app.slowFadeAmp }),
