@@ -93,6 +93,7 @@ class Main: PApplet() {
 
     override fun settings() {
         size(1100, 900)
+        fullScreen()
 
         app = this
     }

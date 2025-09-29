@@ -254,7 +254,10 @@ class Parameters {
     var enumValues = EnumMap(EnumValues.entries.associateWith { Parameter(it.initial) })
 
     var ballColor = getColor()
-    var bounds = Pair(PVector(0f, 0f), PVector(900f, 900f))
+    var bounds = Pair(
+        PVector(0f, 0f),
+        PVector(app.width - 200f, app.height.toFloat())
+    )
 
     private val sliders = floatValues.map {
         e -> Slider((e.key.ordinal + 1) * 40f, e.value, e.key)
