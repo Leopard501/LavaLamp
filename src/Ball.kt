@@ -18,7 +18,11 @@ class Ball {
 
     fun update() {
         // basic movement
-        velocity.add(PVector(0f, parameters[FloatValue.Gravity]))
+        velocity.add(
+            PVector.fromAngle(
+                parameters[FloatValue.GravityDirection] + PConstants.HALF_PI
+            ).setMag(parameters[FloatValue.Gravity])
+        )
         position.add(velocity)
 
         // edge collision

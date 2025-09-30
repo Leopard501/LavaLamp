@@ -36,6 +36,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallSpring("Springiness", 0.05f, 0f, 1f, 2, MusicParameter.Red),
     BallStick("Stickiness", 0.05f, 0f, 1f, 2, MusicParameter.Blue),
     Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameter.Bpm),
+    GravityDirection("Gravity Direction", 0f, 0f, PConstants.TWO_PI, 1, MusicParameter.Minimum),
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameter.Low),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
     ShuffleSpeed("Shuffle Speed", 0f, 0f, 120f, 1, null),
