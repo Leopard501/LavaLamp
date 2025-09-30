@@ -43,7 +43,6 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
-    ShowBalls("Show Balls", true),
     ShowGrid("Show Grid", false),
     ShowBackground("Show Background", false),
     InvertMouseForce("Invert Mouse Force", false),

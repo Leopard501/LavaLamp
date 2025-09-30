@@ -163,8 +163,7 @@ class Main: PApplet() {
                 parameters.bounds.second.x, parameters.bounds.second.y)
         }
 
-        if (parameters[BooleanValues.ShowBalls])
-            balls.forEach { ball -> ball.display() }
+        balls.forEach { ball -> ball.display() }
         if (parameters[BooleanValues.ShowGrid])
             grid.display()
 
