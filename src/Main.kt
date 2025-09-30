@@ -158,13 +158,10 @@ class Main: PApplet() {
     }
 
     private fun display() {
-        if (parameters[BooleanValues.ShowBackground]) background(100)
-        fill(0f)
+        fill(0f, parameters[FloatValue.BackgroundAlpha])
         noStroke()
-        if (parameters[BooleanValues.ShowBackground]) {
-            rect(parameters.bounds.first.x, parameters.bounds.first.y,
+        rect(parameters.bounds.first.x, parameters.bounds.first.y,
                 parameters.bounds.second.x, parameters.bounds.second.y)
-        }
 
         balls.forEach { ball -> ball.display() }
         if (parameters[BooleanValues.ShowGrid])

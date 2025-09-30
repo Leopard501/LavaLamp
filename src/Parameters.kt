@@ -26,6 +26,7 @@ enum class MusicParameter(val scale: () -> Float) {
     Clockwise({ app.rotation }),
     CounterClockwise({ 1 - app.rotation }),
     PingPong({ app.pingPong }),
+    Manual({ 1f }),
 }
 
 enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int, var musicParameter: MusicParameter?) {
@@ -41,13 +42,13 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameter.Bpm),
     GravityDirection("Gravity Direction", 0f, 0f, PConstants.TWO_PI, 1, MusicParameter.Minimum),
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameter.Low),
+    BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 1, MusicParameter.Minimum),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
     ShuffleSpeed("Shuffle Speed", 0f, 0f, 120f, 1, null),
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
     ShowGrid("Show Grid", false),
-    ShowBackground("Show Background", false),
     InvertMouseForce("Invert Mouse Force", false),
     MusicMode("Music Mode", true),
 }
@@ -183,7 +184,7 @@ class Parameters {
         }
 
         fun musicScale(music: MusicParameter?) {
-            parameter.set(if (music != null) {
+            parameter.set(if (music != null && music != MusicParameter.Manual) {
                 ((value.max - value.min) * music.scale() + value.min).coerceIn(value.min, value.max)
             } else parameter.get())
         }
