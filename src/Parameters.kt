@@ -23,6 +23,9 @@ enum class MusicParameter(val scale: () -> Float) {
     InverseSlowAmp({ 1 - app.slowFadeAmp }),
     InverseSmoothAmp({ 1 - app.smoothAmp }),
     InverseSpikyAmp({ 1 - app.amp }),
+    Clockwise({ app.rotation }),
+    CounterClockwise({ 1 - app.rotation }),
+    PingPong({ app.pingPong }),
 }
 
 enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int, var musicParameter: MusicParameter?) {

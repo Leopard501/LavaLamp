@@ -89,6 +89,9 @@ class Main: PApplet() {
     var soundColor: Color = Color.BLACK
     var shuffleTime = 0
     var delayedShuffleSpeed = 0f
+    var rotation = 0f
+    var pingPong = 0f
+    var pingPongDirection = 1
 
     override fun settings() {
         size(1100, 900)
@@ -229,6 +232,21 @@ class Main: PApplet() {
         if (shuffleTarget > 1000 && millis() - shuffleTime > shuffleTarget) {
             shuffleSound()
             shuffleTime = millis()
+        }
+
+        // rotation
+        rotation += (avgBpm / (3600 * 6))
+        if (rotation > 1) rotation -= 1
+
+        // ping pong
+        pingPong += (avgBpm / (3600 * 6)) * pingPongDirection
+        if (pingPong >= 1) {
+            pingPongDirection = -1
+            pingPong = 1f
+        }
+        if (pingPong <= 0) {
+            pingPongDirection = 1
+            pingPong = 0f
         }
     }
 
