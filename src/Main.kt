@@ -210,6 +210,7 @@ class Main: PApplet() {
         }
         beatsFft.forEach { it.update() }
         avgBpm = beatsFft.map { it.getBpm() }.sum() / beatsFft.size
+        if (amp < 0.01) avgBpm = 0f
 
         // color
         soundColor = Color.BLACK
