@@ -33,8 +33,8 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallRed("Red", 1f, 0f, 1f, 1, MusicParameter.Red),
     BallGreen("Green", 0f, 0f, 1f, 1, MusicParameter.Green),
     BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameter.Blue),
-    BallAlpha("Alpha", 180f, 5f, 255f, 1, MusicParameter.High),
-    BallCount("Ball Count", 80f, 10f, 1000f, 3, MusicParameter.SlowAmp),
+    BallAlpha("Alpha", 180f, 5f, 255f, 2, MusicParameter.High),
+    BallCount("Ball Count", 80f, 10f, 1000f, 2, MusicParameter.SlowAmp),
     BallRadius("Ball Radius", 10f, 5f, 25f, 1, MusicParameter.Low),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2, MusicParameter.Bpm),
     BallSpring("Springiness", 0.05f, 0f, 1f, 2, MusicParameter.Red),
@@ -42,7 +42,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameter.Bpm),
     GravityDirection("Gravity Direction", 0f, 0f, PConstants.TWO_PI, 1, MusicParameter.Minimum),
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameter.Low),
-    BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 1, MusicParameter.Minimum),
+    BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 2, MusicParameter.Minimum),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
     ShuffleSpeed("Shuffle Speed", 0f, 0f, 120f, 1, null),
 }
@@ -185,7 +185,7 @@ class Parameters {
 
         fun musicScale(music: MusicParameter?) {
             parameter.set(if (music != null && music != MusicParameter.Manual) {
-                ((value.max - value.min) * music.scale() + value.min).coerceIn(value.min, value.max)
+                ((value.max - value.min) * music.scale().pow(value.scale) + value.min).coerceIn(value.min, value.max)
             } else parameter.get())
         }
     }
