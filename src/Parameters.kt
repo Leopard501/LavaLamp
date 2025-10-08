@@ -35,7 +35,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallRed("Red", 1f, 0f, 1f, 1, MusicParameter.Red),
     BallGreen("Green", 0f, 0f, 1f, 1, MusicParameter.Green),
     BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameter.Blue),
-    BallAlpha("Alpha", 180f, 5f, 255f, 2, MusicParameter.High),
+    BallAlpha("Alpha", 180f, 25f, 255f, 2, MusicParameter.High),
     BallCount("Ball Count", 80f, 10f, 1000f, 2, MusicParameter.SlowAmp),
     BallRadius("Ball Radius", 10f, 5f, 25f, 1, MusicParameter.Low),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2, MusicParameter.Bpm),
@@ -43,6 +43,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallStick("Stickiness", 0.05f, 0f, 1f, 2, MusicParameter.Blue),
     Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameter.Bpm),
     GravityDirection("Gravity Direction", 0f, 0f, PConstants.TWO_PI, 1, MusicParameter.Minimum),
+    PolarGravity("Polar Gravity", 0f, 0f, 1f, 1, MusicParameter.Clockwise),
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameter.Low),
     BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 2, MusicParameter.Minimum),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
@@ -50,7 +51,6 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
-    PolarGravity("Polar Gravity", false),
     ShowGrid("Show Grid", false),
     InvertMouseForce("Invert Mouse Force", false),
     MusicMode("Music Mode", true),

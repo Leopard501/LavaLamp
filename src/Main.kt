@@ -229,7 +229,6 @@ class Main: PApplet() {
         val shuffleTarget = parameters[FloatValue.ShuffleSpeed] * 1000
         if (shuffleTarget > 1000 && millis() - shuffleTime > shuffleTarget) {
             shuffleSound()
-            shuffleTime = millis()
         }
 
         // rotation
@@ -249,6 +248,7 @@ class Main: PApplet() {
     }
 
     fun shuffleSound() {
+        shuffleTime = millis()
         FloatValue.entries.forEach {
             if (it.musicParameter != null) {
                 it.musicParameter = MusicParameter.entries[app.random(MusicParameter.entries.size.toFloat()).toInt()]
