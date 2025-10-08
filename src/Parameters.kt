@@ -15,6 +15,7 @@ enum class MusicParameter(val scale: () -> Float) {
     SmoothAmp({ app.smoothAmp }),
     SpikyAmp({ app.amp }),
     Low({ 0.1f }),
+    Medium( { 0.5f }),
     High({ 0.9f }),
     Minimum({ 0f }),
     Maximum({ 1f }),
