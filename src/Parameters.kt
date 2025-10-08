@@ -26,6 +26,7 @@ enum class MusicParameter(val scale: () -> Float) {
     Clockwise({ app.rotation }),
     CounterClockwise({ 1 - app.rotation }),
     PingPong({ app.pingPong }),
+    PongPing({ 1 - app.pingPong }),
     Manual({ 1f }),
 }
 
