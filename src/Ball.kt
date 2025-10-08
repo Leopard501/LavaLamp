@@ -18,11 +18,18 @@ class Ball {
 
     fun update() {
         // basic movement
-        velocity.add(
+        velocity.add(if (parameters[BooleanValues.PolarGravity]) {
+            PVector.fromAngle(
+                (
+                            position - PVector(parameters.bounds.second.x / 2, parameters.bounds.second.y / 2)
+                        ).heading() +
+                        parameters[FloatValue.GravityDirection]
+            ).setMag(parameters[FloatValue.Gravity])
+        } else {
             PVector.fromAngle(
                 parameters[FloatValue.GravityDirection] + PConstants.HALF_PI
             ).setMag(parameters[FloatValue.Gravity])
-        )
+        })
         position.add(velocity)
 
         // edge collision
