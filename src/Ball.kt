@@ -16,6 +16,8 @@ class Ball {
 
     private var stickForce = PVector(0f, 0f)
 
+    private val colorAge = app.random(1f)
+
     fun update() {
         // basic movement
         velocity.add(if (parameters[FloatValue.PolarGravity] > 0.5f) {
@@ -109,8 +111,10 @@ class Ball {
 
     fun display() {
         app.noStroke()
+        val i = (parameters.ballColors.size - parameters[FloatValue.ColorDelay] * colorAge)
+            .toInt().coerceIn(0, parameters.ballColors.size-1)
         val c = when (parameters[EnumValues.DisplayMode]) {
-            EnumValues.DisplayModeValues.Normal -> parameters.ballColor.rgb
+            EnumValues.DisplayModeValues.Normal -> parameters.ballColors[i].rgb
             EnumValues.DisplayModeValues.Grid -> grid.colorize(position).rgb
             EnumValues.DisplayModeValues.Velocity -> {
                 (Color.RED * (-velocity.y / 10f) +
@@ -124,7 +128,7 @@ class Ball {
                     stickForce.mag() / parameters[FloatValue.BallStick], PConstants.RGB
                 )
             } else -> {
-                parameters.ballColor.rgb
+                parameters.ballColors[i].rgb
             }
         }
         app.fill(c, parameters[FloatValue.BallAlpha])

@@ -40,7 +40,8 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallGreen("Green", 0f, 0f, 1f, 1, MusicParameter.Green),
     BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameter.Blue),
     BallAlpha("Alpha", 180f, 25f, 255f, 2, MusicParameter.High),
-    BallCount("Ball Count", 80f, 10f, 1000f, 2, MusicParameter.SlowAmp),
+    ColorDelay("Color Delay", 0f, 0f, 120f, 1, MusicParameter.Manual),
+    BallCount("Ball Count", 80f, 10f, 800f, 2, MusicParameter.SlowAmp),
     BallRadius("Ball Radius", 10f, 5f, 25f, 1, MusicParameter.Low),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2, MusicParameter.Bpm),
     BallSpring("Springiness", 0.05f, 0f, 1f, 2, MusicParameter.Red),
@@ -116,7 +117,7 @@ class Parameters {
             app.strokeWeight(2f)
             app.line(start, height, end, height)
 
-            app.fill(parameters.ballColor.rgb)
+            app.fill(parameters.ballColors.last().rgb)
             app.noStroke()
             app.circle(start + areaWidth * 0.8f * s,
                 height, 10f)
@@ -131,7 +132,7 @@ class Parameters {
             // music parameter picker
             if (!parameters[BooleanValues.MusicMode] || value.musicParameter == null) return
             app.textAlign(PConstants.LEFT)
-            app.fill(parameters.ballColor.rgb)
+            app.fill(parameters.ballColors.last().rgb)
             app.text(value.musicParameter.toString(), end + 0.1f * areaWidth, height)
         }
 
@@ -209,7 +210,7 @@ class Parameters {
             app.textAlign(PConstants.LEFT)
             app.fill(0f)
             app.text("${value.id}: ", start, height)
-            app.fill(parameters.ballColor.rgb)
+            app.fill(parameters.ballColors.last().rgb)
             val p = start + app.textWidth("${value.id}: ")
             app.text(parameter.get().id, p, height)
         }
@@ -240,7 +241,7 @@ class Parameters {
 
             app.stroke(0f)
             app.strokeWeight(2f)
-            if (v.get()) app.fill(parameters.ballColor.rgb)
+            if (v.get()) app.fill(parameters.ballColors.last().rgb)
             else app.noFill()
             app.rect(start, height - 10f, start + 10f, height)
 
@@ -271,7 +272,7 @@ class Parameters {
 
             app.textAlign(PConstants.LEFT)
             app.fill(0f)
-            app.fill(parameters.ballColor.rgb)
+            app.fill(parameters.ballColors.last().rgb)
             app.text(name, start, height)
         }
 
@@ -290,7 +291,7 @@ class Parameters {
     var booleanValues = EnumMap(BooleanValues.entries.associateWith { Parameter(it.initial) })
     var enumValues = EnumMap(EnumValues.entries.associateWith { Parameter(it.initial) })
 
-    var ballColor = getColor()
+    var ballColors = LimitedStack<Color>(FloatValue.ColorDelay.max.toInt())
     var bounds = Pair(
         PVector(0f, 0f),
         PVector(app.width - 300f, app.height.toFloat())
@@ -330,7 +331,7 @@ class Parameters {
         pickers.forEach { picker -> picker.update() }
         buttons.forEach { button -> button.update() }
 
-        ballColor = getColor()
+        ballColors.push(getColor())
     }
 
     private fun getColor(): Color {
