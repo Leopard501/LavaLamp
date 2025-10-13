@@ -45,19 +45,22 @@ class Beat() {
 
     var threshold = 0f
     var delays = LimitedStack<Int>(10)
+    var isBeat = false
 
     fun push(value: Float, time: Int) {
-        if (value > threshold && value - threshold > 0.02f) {
-            beats.push(Pair(value, time))
-            threshold = value
-            if (beats.size > 1) {
-                delays.push(beats[beats.size-1].second - beats[beats.size-2].second)
-            }
+        if (value <= threshold || value - threshold <= 0.02f) return
+
+        beats.push(Pair(value, time))
+        threshold = value
+        if (beats.size > 1) {
+            delays.push(beats[beats.size-1].second - beats[beats.size-2].second)
         }
+        isBeat = true
     }
 
     fun update() {
         threshold *= thresholdScale
+        isBeat = false
     }
 
     fun getBpm(): Float {
@@ -92,6 +95,8 @@ class Main: PApplet() {
     var rotation = 0f
     var pingPong = 0f
     var pingPongDirection = 1
+    var fastBeat = 0f
+    var slowBeat = 0f
 
     override fun settings() {
         size(1100, 900)
@@ -204,13 +209,22 @@ class Main: PApplet() {
         }
         fadeFft = fadeFft.mapIndexed { i, e -> max(fft[i], e * fadeRate) }.toFloatArray()
 
-        // beats fft
+        // beat
+        var isBeat = false
         fadeFft.forEachIndexed {
-            i, it -> beatsFft[i].push(it, millis())
+            i, it ->
+                beatsFft[i].push(it, millis())
+                if (beatsFft[i].isBeat) isBeat = true
         }
         beatsFft.forEach { it.update() }
         avgBpm = beatsFft.map { it.getBpm() }.sum() / beatsFft.size
         if (amp < 0.01) avgBpm = 0f
+        slowBeat *= 0.99f
+        fastBeat *= 0.95f
+        if (isBeat) {
+            slowBeat = 1f
+            fastBeat = 1f
+        }
 
         // color
         soundColor = Color.BLACK
