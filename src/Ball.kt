@@ -15,7 +15,6 @@ class Ball {
     private var cell: Grid.Cell? = null
 
     private var stickForce = PVector(0f, 0f)
-
     private val colorAge = app.random(1f)
 
     fun update() {
@@ -35,10 +34,10 @@ class Ball {
         position.add(velocity)
 
         // edge collision
-        val bottom = parameters.bounds.second.y - parameters[FloatValue.BallRadius]
-        val top = parameters[FloatValue.BallRadius]
-        val right = parameters.bounds.second.x - parameters[FloatValue.BallRadius]
-        val left = parameters[FloatValue.BallRadius]
+        val bottom = parameters.bounds.second.y - parameters.ballRadius
+        val top = parameters.ballRadius
+        val right = parameters.bounds.second.x - parameters.ballRadius
+        val left = parameters.ballRadius
 
         if (position.y > bottom) {
             position.y = bottom
@@ -62,7 +61,7 @@ class Ball {
             val disp = other.position - position
 
             // collision
-            val minDist = parameters[FloatValue.BallRadius] * 2
+            val minDist = parameters.ballRadius * 2
             if (disp.mag() < minDist) {
                 val target = position + disp.setMag(minDist)
                 var f = (target - other.position) * parameters[FloatValue.BallSpring]
@@ -74,7 +73,7 @@ class Ball {
 
             // stickiness
             if (parameters[FloatValue.BallStick] > 0) {
-                val dist = ((position - other.position).mag() / parameters[FloatValue.BallRadius]).coerceAtLeast(1f)
+                val dist = ((position - other.position).mag() / parameters.ballRadius).coerceAtLeast(1f)
                 val f = (position - other.position).setMag(1 / dist.pow(2)) * parameters[FloatValue.BallStick]
                 stickForce = f
                 velocity -= f
@@ -85,7 +84,7 @@ class Ball {
         // mouse interaction
         if (parameters[FloatValue.MouseForce] > 0 && app.mousePressed && app.mouseX < parameters.bounds.second.x) {
             val mousePos = PVector(app.mouseX.toFloat(), app.mouseY.toFloat())
-            val dist = ((position - mousePos).mag() / parameters[FloatValue.BallRadius]).coerceAtLeast(1f)
+            val dist = ((position - mousePos).mag() / parameters.ballRadius).coerceAtLeast(1f)
             val mag = when (parameters[EnumValues.MouseForceType]) {
                 EnumValues.ForceTypeValues.Inverse -> 1f / dist
                 EnumValues.ForceTypeValues.Linear -> dist / 100f
@@ -132,6 +131,6 @@ class Ball {
             }
         }
         app.fill(c, parameters[FloatValue.BallAlpha])
-        app.circle(position.x, position.y, parameters[FloatValue.BallRadius] * 2)
+        app.circle(position.x, position.y, parameters.ballRadius * 2)
     }
 }

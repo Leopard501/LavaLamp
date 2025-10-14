@@ -4,6 +4,7 @@ import processing.core.PVector
 import java.awt.Color
 import java.util.*
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 enum class MusicParameter(val scale: () -> Float) {
     Red({ app.soundColor.red / 255f }),
@@ -41,8 +42,8 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameter.Blue),
     BallAlpha("Alpha", 180f, 25f, 255f, 2, MusicParameter.High),
     ColorDelay("Color Delay", 0f, 0f, 120f, 1, MusicParameter.Manual),
-    BallCount("Ball Count", 80f, 10f, 800f, 2, MusicParameter.SlowAmp),
-    BallRadius("Ball Radius", 10f, 5f, 25f, 1, MusicParameter.Low),
+    BallCount("Ball Count", 80f, 25f, 1000f, 2, MusicParameter.SlowAmp),
+    BallRadius("Ball Radius", 0.2f, 0f, 1f, 1, MusicParameter.Low),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2, MusicParameter.Bpm),
     BallSpring("Springiness", 0.05f, 0f, 1f, 2, MusicParameter.Red),
     BallStick("Stickiness", 0.05f, 0f, 1f, 2, MusicParameter.Blue),
@@ -295,6 +296,8 @@ class Parameters {
         PVector(0f, 0f),
         PVector(app.width - 300f, app.height.toFloat())
     )
+    var maxBallRadius = 10f
+    var ballRadius = 10f
 
     private val sliders = floatValues.map {
         e -> Slider((e.key.ordinal + 1) * 40f, e.value, e.key, )
@@ -329,6 +332,11 @@ class Parameters {
         checkboxes.forEach { checkbox -> checkbox.update() }
         pickers.forEach { picker -> picker.update() }
         buttons.forEach { button -> button.update() }
+
+        maxBallRadius = sqrt(
+            (parameters.bounds.second.x * parameters.bounds.second.y) / parameters[FloatValue.BallCount]
+        )
+        ballRadius = parameters[FloatValue.BallRadius] * parameters.maxBallRadius * 0.25f + 5f
 
         ballColors.push(getColor())
     }
