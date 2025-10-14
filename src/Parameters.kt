@@ -52,7 +52,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameter.Low),
     BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 2, MusicParameter.Minimum),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
-    ShuffleSpeed("Shuffle Speed", 0f, 0f, 120f, 1, null),
+    ShuffleSpeed("Shuffle Speed", 30f, 0f, 120f, 1, null),
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
@@ -113,7 +113,7 @@ class Parameters {
             }
             val s = ((parameter.get() - value.min) / (value.max - value.min)).pow(1 / value.scale.toFloat())
 
-            app.stroke(0f)
+            app.stroke(255f)
             app.strokeWeight(2f)
             app.line(start, height, end, height)
 
@@ -123,7 +123,7 @@ class Parameters {
                 height, 10f)
 
             app.textAlign(PConstants.CENTER)
-            app.fill(0f)
+            app.fill(255f)
             app.text(value.id, start + areaWidth * 0.4f, height - 10f)
             app.text(parameter.get(),
                 start + areaWidth * 0.8f * s,
@@ -208,7 +208,7 @@ class Parameters {
             val start = parameters.bounds.second.x + 0.1f * areaWidth
 
             app.textAlign(PConstants.LEFT)
-            app.fill(0f)
+            app.fill(255f)
             app.text("${value.id}: ", start, height)
             app.fill(parameters.ballColors.last().rgb)
             val p = start + app.textWidth("${value.id}: ")
@@ -239,14 +239,14 @@ class Parameters {
             val areaWidth = app.width - parameters.bounds.second.x
             val start = parameters.bounds.second.x + 0.1f * areaWidth
 
-            app.stroke(0f)
+            app.stroke(255f)
             app.strokeWeight(2f)
             if (v.get()) app.fill(parameters.ballColors.last().rgb)
             else app.noFill()
             app.rect(start, height - 10f, start + 10f, height)
 
             app.textAlign(PConstants.LEFT)
-            app.fill(0f)
+            app.fill(255f)
             app.text(name, start + 10f + 10f, height)
         }
 
@@ -271,7 +271,6 @@ class Parameters {
             val start = parameters.bounds.second.x + 0.1f * areaWidth
 
             app.textAlign(PConstants.LEFT)
-            app.fill(0f)
             app.fill(parameters.ballColors.last().rgb)
             app.text(name, start, height)
         }
@@ -315,7 +314,7 @@ class Parameters {
 
     fun display() {
         app.noStroke()
-        app.fill(100f)
+        app.fill(0)
         val areaWidth = app.width - parameters.bounds.second.x
         app.rect(parameters.bounds.second.x, 0f, parameters.bounds.second.x + areaWidth, app.height.toFloat())
 
