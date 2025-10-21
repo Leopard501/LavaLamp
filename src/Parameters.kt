@@ -138,6 +138,10 @@ class Parameters {
         }
 
         fun update() {
+            if (parameters[BooleanValues.MusicMode]) musicScale(value.musicParameter)
+
+            if (parameters.hidden) return
+
             if (!held && app.mousePressed &&
                 app.mouseX > parameters.bounds.second.x &&
                 if (parameters[BooleanValues.MusicMode] && value.musicParameter != null) {
@@ -162,8 +166,6 @@ class Parameters {
             } else {
                 app.width - 0.1f * areaWidth
             }
-
-            if (parameters[BooleanValues.MusicMode]) musicScale(value.musicParameter)
 
             if (held) {
                 val s = PApplet.map(
@@ -217,6 +219,8 @@ class Parameters {
         }
 
         fun update() {
+            if (parameters.hidden) return
+
             if (!(mousePressedPulse &&
                         app.mouseX > parameters.bounds.second.x &&
                         app.mouseY > height - 10f &&
@@ -252,6 +256,8 @@ class Parameters {
         }
 
         fun update() {
+            if (parameters.hidden) return
+
             if (!(mousePressedPulse &&
                 app.mouseX > parameters.bounds.second.x &&
                 app.mouseY > height - 10f &&
@@ -277,6 +283,8 @@ class Parameters {
         }
 
         fun update() {
+            if (parameters.hidden) return
+
             if (!(mousePressedPulse &&
                         app.mouseX > parameters.bounds.second.x &&
                         app.mouseY > height - 10f &&
@@ -298,6 +306,7 @@ class Parameters {
     )
     var maxBallRadius = 10f
     var ballRadius = 10f
+    var hidden = false
 
     private val sliders = floatValues.map {
         e -> Slider((e.key.ordinal + 1) * 40f, e.value, e.key, )
@@ -311,11 +320,14 @@ class Parameters {
     private val buttons = arrayOf(
         Button(checkboxes.last().height + 20f, { saving = true }, "Save"),
         Button(checkboxes.last().height + 40f, { app.shuffleSound() }, "Shuffle"),
+        Button(checkboxes.last().height + 60f, { parameters.toggleHidden() }, "Hide"),
     )
 
     var sliderHeld = false
 
     fun display() {
+        if (hidden) return
+
         app.noStroke()
         app.fill(0)
         val areaWidth = app.width - parameters.bounds.second.x
@@ -328,6 +340,12 @@ class Parameters {
     }
 
     fun update() {
+        if (hidden) {
+            if (app.mouseX > app.width - 50f && app.mousePressed) {
+                toggleHidden()
+            }
+        }
+
         sliders.forEach { slider -> slider.update() }
         checkboxes.forEach { checkbox -> checkbox.update() }
         pickers.forEach { picker -> picker.update() }
@@ -339,6 +357,22 @@ class Parameters {
         ballRadius = parameters[FloatValue.BallRadius] * parameters.maxBallRadius * 0.25f + 5f
 
         ballColors.push(getColor())
+    }
+
+    private fun toggleHidden() {
+        if (hidden) {
+            bounds = Pair(
+                PVector(0f, 0f),
+                PVector(app.width - 300f, app.height.toFloat())
+            )
+            hidden = false
+        } else {
+            bounds = Pair(
+                PVector(0f, 0f),
+                PVector(app.width.toFloat(), app.height.toFloat())
+            )
+            hidden = true
+        }
     }
 
     private fun getColor(): Color {
