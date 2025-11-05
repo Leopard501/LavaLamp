@@ -1,4 +1,5 @@
 import processing.core.PApplet
+import processing.core.PApplet.atan2
 import processing.core.PConstants
 import processing.core.PVector
 import java.awt.Color
@@ -33,23 +34,33 @@ enum class MusicParameter(val scale: () -> Float) {
     CounterClockwise({ 1 - app.rotation }),
     PingPong({ app.pingPong }),
     PongPing({ 1 - app.pingPong }),
+    MouseX({ app.mouseX / parameters.bounds.second.x }),
+    MouseY({ 1 - app.mouseY / parameters.bounds.second.y }),
+    MouseDirection({
+        (atan2(
+            app.mouseY.toFloat() - (parameters[FloatValue.PoleY] * parameters.bounds.second.y),
+            app.mouseX.toFloat() - (parameters[FloatValue.PoleX] * parameters.bounds.second.x)
+        ) + PConstants.PI) / PConstants.TWO_PI
+    } ),
     Manual({ 1f }),
 }
 
 enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int, var musicParameter: MusicParameter?) {
-    BallRed("Red", 1f, 0f, 1f, 1, MusicParameter.Red),
+    BallRed("Red", 1f, 0f, 1f, 1, MusicParameter.Maximum),
     BallGreen("Green", 0f, 0f, 1f, 1, MusicParameter.Green),
     BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameter.Blue),
     BallAlpha("Alpha", 180f, 25f, 255f, 2, MusicParameter.High),
     ColorDelay("Color Delay", 0f, 0f, 120f, 1, MusicParameter.Manual),
     BallCount("Ball Count", 80f, 25f, 1000f, 2, MusicParameter.SlowAmp),
-    BallRadius("Ball Radius", 0.2f, 0f, 1f, 1, MusicParameter.Low),
+    BallRadius("Ball Radius", 0.2f, 0f, 1f, 1, MusicParameter.MouseDirection),
     BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2, MusicParameter.Bpm),
-    BallSpring("Springiness", 0.05f, 0f, 1f, 2, MusicParameter.Red),
+    BallSpring("Springiness", 0.05f, 0f, 1f, 3, MusicParameter.Red),
     BallStick("Stickiness", 0.05f, 0f, 1f, 2, MusicParameter.Blue),
     Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameter.Bpm),
     GravityDirection("Gravity Direction", 0f, 0f, PConstants.TWO_PI, 1, MusicParameter.Minimum),
     PolarGravity("Polar Gravity", 0f, 0f, 1f, 1, MusicParameter.Clockwise),
+    PoleX("Pole X", 0.5f, 0f, 1f, 1, MusicParameter.Medium),
+    PoleY("Pole Y", 0.5f, 0f, 1f, 1, MusicParameter.Medium),
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameter.Low),
     BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 2, MusicParameter.Minimum),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),

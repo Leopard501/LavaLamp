@@ -21,11 +21,13 @@ class Ball {
         // basic movement
         velocity.add(if (parameters[FloatValue.PolarGravity] > 0.5f) {
             PVector.fromAngle(
-                (
-                            position - PVector(parameters.bounds.second.x / 2, parameters.bounds.second.y / 2)
-                        ).heading() +
-                        parameters[FloatValue.GravityDirection]
-            ).setMag(parameters[FloatValue.Gravity])
+            (
+                        position - PVector(
+                            parameters.bounds.second.x * parameters[FloatValue.PoleX],
+                            parameters.bounds.second.y * parameters[FloatValue.PoleY])
+                    ).heading() +
+                    parameters[FloatValue.GravityDirection]
+                ).setMag(parameters[FloatValue.Gravity])
         } else {
             PVector.fromAngle(
                 parameters[FloatValue.GravityDirection] + PConstants.HALF_PI
