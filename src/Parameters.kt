@@ -7,62 +7,87 @@ import java.util.*
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-enum class MusicParameter(val scale: () -> Float) {
-    Red({ app.soundColor.red / 255f }),
-    Green({ app.soundColor.green / 255f }),
-    Blue({ app.soundColor.blue / 255f }),
-    Bpm({ (app.avgBpm - 30) / 120 }),
-    Amp({ app.fadeAmp }),
-    SlowAmp({ app.slowFadeAmp }),
-    SmoothAmp({ app.smoothAmp }),
-    SpikyAmp({ app.amp }),
-    FastBeat({ app.fastBeat }),
-    SlowBeat({ app.slowBeat }),
-    Low({ 0.1f }),
-    Medium( { 0.5f }),
-    High({ 0.9f }),
-    Minimum({ 0f }),
-    Maximum({ 1f }),
-    InverseAmp({ 1 - app.fadeAmp }),
-    InverseBpm({ (1 - (app.avgBpm - 30) / 120) }),
-    InverseSlowAmp({ 1 - app.slowFadeAmp }),
-    InverseSmoothAmp({ 1 - app.smoothAmp }),
-    InverseSpikyAmp({ 1 - app.amp }),
-    InverseFastBeat({ 1 - app.fastBeat }),
-    InverseSlowBeat({ 1 - app.slowBeat }),
-    Clockwise({ app.rotation }),
-    CounterClockwise({ 1 - app.rotation }),
-    PingPong({ app.pingPong }),
-    PongPing({ 1 - app.pingPong }),
-    MouseX({ app.mouseX / parameters.bounds.second.x }),
-    MouseY({ 1 - app.mouseY / parameters.bounds.second.y }),
-    MouseDirection({
-        (atan2(
-            app.mouseY.toFloat() - (parameters[FloatValue.PoleY] * parameters.bounds.second.y),
-            app.mouseX.toFloat() - (parameters[FloatValue.PoleX] * parameters.bounds.second.x)
-        ) + PConstants.PI) / PConstants.TWO_PI
-    } ),
-    Manual({ 1f }),
+enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>) {
+    Color(arrayOf(
+        Pair("Red") { app.soundColor.red / 255f },
+        Pair("Green") { app.soundColor.green / 255f },
+        Pair("Blue") { app.soundColor.blue / 255f },
+        Pair("Cyan") { (app.soundColor.green + app.soundColor.blue) / 511f },
+        Pair("Magenta") { (app.soundColor.red + app.soundColor.blue) / 511f },
+        Pair("Yellow") { (app.soundColor.red + app.soundColor.green) / 511f },
+    )),
+    BPM(arrayOf(
+        Pair("Normal") { (app.avgBpm - 30) / 120 },
+        Pair("Inverse") { (1 - (app.avgBpm - 30) / 120) },
+    )),
+    Amp(arrayOf(
+        Pair("Normal") { app.fadeAmp },
+        Pair("Slow") { app.slowFadeAmp },
+        Pair("Smooth") { app.smoothAmp },
+        Pair("Spiky") { app.amp },
+        Pair("Inverse") { 1 - app.fadeAmp },
+        Pair("Inverse Slow") { 1 - app.slowFadeAmp },
+        Pair("Inverse Smooth") { 1 - app.smoothAmp },
+        Pair("Inverse Spiky") { 1 - app.amp },
+    )),
+    Constant(arrayOf(
+        Pair("Minimum") { 0f },
+        Pair("Low") { 0.1f },
+        Pair("Medium") { 0.5f },
+        Pair("High") { 0.9f },
+        Pair("Maximum") { 1f },
+    )),
+    Beat(arrayOf(
+        Pair("Fast") { app.fastBeat },
+        Pair("Slow") { app.slowBeat },
+        Pair("Inverse Fast") { 1 - app.fastBeat },
+        Pair("Inverse Slow") { 1 - app.slowBeat },
+    )),
+    Rotating(arrayOf(
+        Pair("Clockwise") { app.rotation },
+        Pair("Counter Clockwise") { 1 - app.rotation },
+        Pair("Ping-Pong") { app.pingPong },
+        Pair("Pong-Ping") { 1 - app.pingPong },
+    )),
+    Mouse(arrayOf(
+        Pair("X") { app.mouseX / parameters.bounds.second.x },
+        Pair("Y") { 1 - app.mouseY / parameters.bounds.second.y },
+        Pair("-X") { 1 - app.mouseX / parameters.bounds.second.x },
+        Pair("-Y") { app.mouseY / parameters.bounds.second.y },
+        Pair("Direction") {
+            (atan2(
+                app.mouseY.toFloat() - (parameters[FloatValue.PoleY] * parameters.bounds.second.y),
+                app.mouseX.toFloat() - (parameters[FloatValue.PoleX] * parameters.bounds.second.x)
+            ) + PConstants.PI) / PConstants.TWO_PI
+        }
+    ));
+
+    companion object {
+        fun selectRandom(): Pair<String, () -> Float> {
+            val group = entries[app.random(entries.size.toFloat()).toInt()]
+            return group.parameters[app.random(group.parameters.size.toFloat()).toInt()]
+        }
+    }
 }
 
-enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int, var musicParameter: MusicParameter?) {
-    BallRed("Red", 1f, 0f, 1f, 1, MusicParameter.Maximum),
-    BallGreen("Green", 0f, 0f, 1f, 1, MusicParameter.Green),
-    BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameter.Blue),
-    BallAlpha("Alpha", 180f, 25f, 255f, 2, MusicParameter.High),
-    ColorDelay("Color Delay", 0f, 0f, 120f, 1, MusicParameter.Manual),
-    BallCount("Ball Count", 80f, 25f, 1000f, 2, MusicParameter.SlowAmp),
-    BallRadius("Ball Radius", 0.2f, 0f, 1f, 1, MusicParameter.MouseDirection),
-    BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2, MusicParameter.Bpm),
-    BallSpring("Springiness", 0.05f, 0f, 1f, 3, MusicParameter.Red),
-    BallStick("Stickiness", 0.05f, 0f, 1f, 2, MusicParameter.Blue),
-    Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameter.Bpm),
-    GravityDirection("Gravity Direction", 0f, 0f, PConstants.TWO_PI, 1, MusicParameter.Minimum),
-    PolarGravity("Polar Gravity", 0f, 0f, 1f, 1, MusicParameter.Clockwise),
-    PoleX("Pole X", 0.5f, 0f, 1f, 1, MusicParameter.Medium),
-    PoleY("Pole Y", 0.5f, 0f, 1f, 1, MusicParameter.Medium),
-    Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameter.Low),
-    BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 2, MusicParameter.Minimum),
+enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int, var musicParameter: Pair<String, () -> Float>?) {
+    BallRed("Red", 1f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
+    BallGreen("Green", 0f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
+    BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
+    BallAlpha("Alpha", 180f, 25f, 255f, 2, MusicParameterGroups.selectRandom()),
+    ColorDelay("Color Delay", 0f, 0f, 120f, 1, MusicParameterGroups.selectRandom()),
+    BallCount("Ball Count", 80f, 25f, 1000f, 2, MusicParameterGroups.selectRandom()),
+    BallRadius("Ball Radius", 0.2f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
+    BallStartingVel("Starting Velocity", 3f, 0f, 50f, 2, MusicParameterGroups.selectRandom()),
+    BallSpring("Springiness", 0.05f, 0f, 1f, 3, MusicParameterGroups.selectRandom()),
+    BallStick("Stickiness", 0.05f, 0f, 1f, 2, MusicParameterGroups.selectRandom()),
+    Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameterGroups.selectRandom()),
+    GravityDirection("Gravity Direction", 0f, 0f, PConstants.TWO_PI, 1, MusicParameterGroups.selectRandom()),
+    PolarGravity("Polar Gravity", 0f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
+    PoleX("Pole X", 0.5f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
+    PoleY("Pole Y", 0.5f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
+    Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
+    BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 2, MusicParameterGroups.selectRandom()),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
     ShuffleSpeed("Shuffle Speed", 30f, 0f, 120f, 1, null),
 }
@@ -145,11 +170,12 @@ class Parameters {
             if (!parameters[BooleanValues.MusicMode] || value.musicParameter == null) return
             app.textAlign(PConstants.LEFT)
             app.fill(parameters.ballColors.last().rgb)
-            app.text(value.musicParameter.toString(), end + 0.1f * areaWidth, height)
+            if (value.musicParameter != null)
+                app.text(value.musicParameter!!.first, end + 0.1f * areaWidth, height)
         }
 
         fun update() {
-            if (parameters[BooleanValues.MusicMode]) musicScale(value.musicParameter)
+            if (parameters[BooleanValues.MusicMode]) musicScale(value.musicParameter?.second)
 
             if (parameters.hidden) return
 
@@ -198,16 +224,16 @@ class Parameters {
                         app.mouseY < height + 10f))
                 return
 
-            if (value.musicParameter!!.ordinal < MusicParameter.entries.size-1) {
-                value.musicParameter = MusicParameter.entries[value.musicParameter!!.ordinal + 1]
-            } else {
-                value.musicParameter = MusicParameter.entries.first()
-            }
+//            if (value.musicParameter!!.ordinal < MusicParameter.entries.size-1) {
+//                value.musicParameter = MusicParameter.entries[value.musicParameter!!.ordinal + 1]
+//            } else {
+//                value.musicParameter = MusicParameter.entries.first()
+//            }
         }
 
-        fun musicScale(music: MusicParameter?) {
-            parameter.set(if (music != null && music != MusicParameter.Manual) {
-                ((value.max - value.min) * music.scale().pow(value.scale) + value.min).coerceIn(value.min, value.max)
+        fun musicScale(musicFunction: (() -> Float)?) {
+            parameter.set(if (musicFunction != null) {
+                ((value.max - value.min) * musicFunction().pow(value.scale) + value.min).coerceIn(value.min, value.max)
             } else parameter.get())
         }
     }

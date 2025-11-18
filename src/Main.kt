@@ -265,7 +265,7 @@ class Main: PApplet() {
         shuffleTime = millis()
         FloatValue.entries.forEach {
             if (it.musicParameter != null) {
-                it.musicParameter = MusicParameter.entries[app.random(MusicParameter.entries.size.toFloat()).toInt()]
+                it.musicParameter = MusicParameterGroups.selectRandom()
             }
         }
     }
