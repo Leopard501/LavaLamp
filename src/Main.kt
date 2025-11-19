@@ -263,9 +263,10 @@ class Main: PApplet() {
 
     fun shuffleSound() {
         shuffleTime = millis()
+        MusicParameterGroups.randomizeWeights()
         FloatValue.entries.forEach {
             if (it.musicParameter != null) {
-                it.musicParameter = MusicParameterGroups.selectRandom()
+                it.musicParameter = MusicParameterGroups.selectWeighted()
             }
         }
     }

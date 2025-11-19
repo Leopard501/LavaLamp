@@ -17,11 +17,11 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
         Pair("Yellow") { (app.soundColor.red + app.soundColor.green) / 511f },
     )),
     BPM(arrayOf(
-        Pair("Normal") { (app.avgBpm - 30) / 120 },
-        Pair("Inverse") { (1 - (app.avgBpm - 30) / 120) },
+        Pair("BPM") { (app.avgBpm - 30) / 120 },
+        Pair("Inverse BPM") { (1 - (app.avgBpm - 30) / 120) },
     )),
     Amp(arrayOf(
-        Pair("Normal") { app.fadeAmp },
+        Pair("Amp") { app.fadeAmp },
         Pair("Slow") { app.slowFadeAmp },
         Pair("Smooth") { app.smoothAmp },
         Pair("Spiky") { app.amp },
@@ -63,9 +63,24 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
     ));
 
     companion object {
+        var weights = ArrayList<MusicParameterGroups>()
+
+        fun randomizeWeights() {
+            for (e in entries) {
+                repeat(app.random(1f, 16f).toInt()) {
+                    weights.add(e)
+                }
+            }
+        }
+
         fun selectRandom(): Pair<String, () -> Float> {
-            val group = entries[app.random(entries.size.toFloat()).toInt()]
-            return group.parameters[app.random(group.parameters.size.toFloat()).toInt()]
+            val group = entries[app.random(entries.size.toFloat()).toInt()].parameters
+            return group[app.random(group.size.toFloat()).toInt()]
+        }
+
+        fun selectWeighted(): Pair<String, () -> Float> {
+            val group = weights[app.random(weights.size.toFloat()).toInt()].parameters
+            return group[app.random(group.size.toFloat()).toInt()]
         }
     }
 }
