@@ -14,7 +14,7 @@ class Grid {
 
     init {
         val boundsSize = parameters.bounds.second - parameters.bounds.first
-        val shortSide = parameters.ballRadius * 2
+        val shortSide = parameters.adjustedBallRadius * 2
         val ratio = max(boundsSize.x, boundsSize.y) / min(boundsSize.x, boundsSize.y)
         cellSize = if (boundsSize.x > boundsSize.y) {
             PVector(shortSide * ratio, shortSide)

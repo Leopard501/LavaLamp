@@ -104,7 +104,7 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 2, MusicParameterGroups.selectRandom()),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
-    ShuffleSpeed("Shuffle Speed", 30f, 0f, 120f, 1, null),
+    ShuffleSpeed("Shuffle Speed", 30f, 0f, 120f, 2, null),
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
@@ -112,6 +112,8 @@ enum class BooleanValues(val id: String, val initial: Boolean) {
     InvertMouseForce("Invert Mouse Force", false),
     MusicMode("Music Mode", true),
     ParameterShuffle("Per-Parameter Shuffle", true),
+    HorizontalBarrier("Horizontal Barrier", true),
+    VerticalBarrier("Vertical Barrier", true),
 }
 
 open class Mode(val next: Mode?, val id: String)
@@ -370,7 +372,7 @@ class Parameters {
         PVector(app.width - 300f, app.height.toFloat())
     )
     private var maxBallRadius = 10f
-    var ballRadius = 10f
+    var adjustedBallRadius = 10f
     var hidden = false
 
     private val sliders = floatValues.map {
@@ -419,7 +421,7 @@ class Parameters {
         maxBallRadius = sqrt(
             (parameters.bounds.second.x * parameters.bounds.second.y) / parameters[FloatValue.BallCount]
         )
-        ballRadius = parameters[FloatValue.BallRadius] * parameters.maxBallRadius * 0.25f + 5f
+        adjustedBallRadius = parameters[FloatValue.BallRadius] * parameters.maxBallRadius * 0.25f + 5f
 
         ballColors.push(getColor())
     }

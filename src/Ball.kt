@@ -6,9 +6,11 @@ import kotlin.math.pow
 
 class Ball {
 
-    var position = PVector(
+    private var position = PVector(
         app.random(parameters.bounds.first.x, parameters.bounds.second.x),
         app.random(parameters.bounds.first.y, parameters.bounds.second.y))
+    private var telePosition = PVector(-100f, -100f)
+    private var drawTele = false
 
     private var velocity = PVector.random2D().setMag(app.random(
         parameters[FloatValue.BallStartingVel]))
@@ -34,26 +36,68 @@ class Ball {
             ).setMag(parameters[FloatValue.Gravity])
         })
         position.add(velocity)
+        telePosition = position.copy()
+        drawTele = false
 
         // edge collision
-        val bottom = parameters.bounds.second.y - parameters.ballRadius
-        val top = parameters.ballRadius
-        val right = parameters.bounds.second.x - parameters.ballRadius
-        val left = parameters.ballRadius
+        val bottom = parameters.bounds.second.y - parameters.adjustedBallRadius
+        val top = parameters.adjustedBallRadius
+        val right = parameters.bounds.second.x - parameters.adjustedBallRadius
+        val left = parameters.adjustedBallRadius
 
         if (position.y > bottom) {
-            position.y = bottom
-            velocity.y *= -(1 - parameters[FloatValue.Dampening])
+            if (parameters[BooleanValues.VerticalBarrier]) {
+                position.y = bottom
+                velocity.y *= -(1 - parameters[FloatValue.Dampening])
+            } else {
+                drawTele = true
+                telePosition.y -= parameters.bounds.second.y
+
+                if (position.y > bottom + parameters.adjustedBallRadius) {
+                    position.y = top - parameters.adjustedBallRadius
+                    velocity.y *= 1 - parameters[FloatValue.Dampening]
+                }
+            }
         } else if (position.y < top) {
-            position.y = top
-            velocity.y *= -(1 - parameters[FloatValue.Dampening])
+            if (parameters[BooleanValues.VerticalBarrier]) {
+                position.y = top
+                velocity.y *= -(1 - parameters[FloatValue.Dampening])
+            } else {
+                drawTele = true
+                telePosition.y += parameters.bounds.second.y
+
+                if (position.y < top - parameters.adjustedBallRadius) {
+                    position.y = bottom + parameters.adjustedBallRadius
+                    velocity.y *= 1 - parameters[FloatValue.Dampening]
+                }
+            }
         }
         if (position.x > right) {
-            position.x = right
-            velocity.x *= -(1 - parameters[FloatValue.Dampening])
+            if (parameters[BooleanValues.HorizontalBarrier]) {
+                position.x = right
+                velocity.x *= -(1 - parameters[FloatValue.Dampening])
+            } else {
+                drawTele = true
+                telePosition.x -= parameters.bounds.second.x
+
+                if (position.x > right + parameters.adjustedBallRadius) {
+                    position.x = left - parameters.adjustedBallRadius
+                    velocity.x *= 1 - parameters[FloatValue.Dampening]
+                }
+            }
         } else if (position.x < left) {
-            position.x = left
-            velocity.x *= -(1 - parameters[FloatValue.Dampening])
+            if (parameters[BooleanValues.HorizontalBarrier]) {
+                position.x = left
+                velocity.x *= -(1 - parameters[FloatValue.Dampening])
+            } else {
+                drawTele = true
+                telePosition.x += parameters.bounds.second.x
+
+                if (position.x < left - parameters.adjustedBallRadius) {
+                    position.x = right + parameters.adjustedBallRadius
+                    velocity.x *= 1 - parameters[FloatValue.Dampening]
+                }
+            }
         }
 
         // ball interactions
@@ -63,7 +107,7 @@ class Ball {
             val disp = other.position - position
 
             // collision
-            val minDist = parameters.ballRadius * 2
+            val minDist = parameters.adjustedBallRadius * 2
             if (disp.mag() < minDist) {
                 val target = position + disp.setMag(minDist)
                 var f = (target - other.position) * parameters[FloatValue.BallSpring]
@@ -75,7 +119,7 @@ class Ball {
 
             // stickiness
             if (parameters[FloatValue.BallStick] > 0) {
-                val dist = ((position - other.position).mag() / parameters.ballRadius).coerceAtLeast(1f)
+                val dist = ((position - other.position).mag() / parameters.adjustedBallRadius).coerceAtLeast(1f)
                 val f = (position - other.position).setMag(1 / dist.pow(2)) * parameters[FloatValue.BallStick]
                 stickForce = f
                 velocity -= f
@@ -86,7 +130,7 @@ class Ball {
         // mouse interaction
         if (parameters[FloatValue.MouseForce] > 0 && app.mousePressed && app.mouseX < parameters.bounds.second.x) {
             val mousePos = PVector(app.mouseX.toFloat(), app.mouseY.toFloat())
-            val dist = ((position - mousePos).mag() / parameters.ballRadius).coerceAtLeast(1f)
+            val dist = ((position - mousePos).mag() / parameters.adjustedBallRadius).coerceAtLeast(1f)
             val mag = when (parameters[EnumValues.MouseForceType]) {
                 EnumValues.ForceTypeValues.Inverse -> 1f / dist
                 EnumValues.ForceTypeValues.Linear -> dist / 100f
@@ -133,6 +177,9 @@ class Ball {
             }
         }
         app.fill(c, parameters[FloatValue.BallAlpha])
-        app.circle(position.x, position.y, parameters.ballRadius * 2)
+        app.circle(position.x, position.y, parameters.adjustedBallRadius * 2)
+
+        if (drawTele)
+            app.circle(telePosition.x, telePosition.y, parameters.adjustedBallRadius * 2)
     }
 }
