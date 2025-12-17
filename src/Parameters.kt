@@ -63,7 +63,7 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
     ));
 
     companion object {
-        var weights = ArrayList<MusicParameterGroups>()
+        private var weights = ArrayList<MusicParameterGroups>()
 
         fun randomizeWeights() {
             for (e in entries) {
@@ -111,6 +111,7 @@ enum class BooleanValues(val id: String, val initial: Boolean) {
     ShowGrid("Show Grid", false),
     InvertMouseForce("Invert Mouse Force", false),
     MusicMode("Music Mode", true),
+    ParameterShuffle("Per-Parameter Shuffle", true),
 }
 
 open class Mode(val next: Mode?, val id: String)
@@ -150,6 +151,7 @@ class Parameters {
         private val value: FloatValue) {
 
         private var held = false
+        private var timer = 0
 
         fun display() {
             val areaWidth = if (parameters[BooleanValues.MusicMode] && value.musicParameter != null) {
@@ -190,7 +192,11 @@ class Parameters {
         }
 
         fun update() {
-            if (parameters[BooleanValues.MusicMode]) musicScale(value.musicParameter?.second)
+            if (parameters[BooleanValues.MusicMode] && value.musicParameter?.second != null) {
+                musicScale(value.musicParameter?.second)
+                timer--
+                if (timer <= 0) shuffle()
+            }
 
             if (parameters.hidden) return
 
@@ -238,15 +244,22 @@ class Parameters {
                         app.mouseY > height - 10f &&
                         app.mouseY < height + 10f))
                 return
-
-//            if (value.musicParameter!!.ordinal < MusicParameter.entries.size-1) {
-//                value.musicParameter = MusicParameter.entries[value.musicParameter!!.ordinal + 1]
-//            } else {
-//                value.musicParameter = MusicParameter.entries.first()
-//            }
         }
 
-        fun musicScale(musicFunction: (() -> Float)?) {
+        fun shuffle() {
+            if (value.musicParameter?.second == null) return
+
+            if (app.random(5f) < 1) {
+                MusicParameterGroups.randomizeWeights()
+            }
+            value.musicParameter = MusicParameterGroups.selectWeighted()
+            timer = (parameters[FloatValue.ShuffleSpeed] *
+                    if (parameters[BooleanValues.ParameterShuffle]) {
+                        parameters[FloatValue.ShuffleSpeed] * 2f.pow(app.random(-2f, 3f).toInt())
+                    } else { 1f }).toInt()
+        }
+
+        private fun musicScale(musicFunction: (() -> Float)?) {
             parameter.set(if (musicFunction != null) {
                 ((value.max - value.min) * musicFunction().pow(value.scale) + value.min).coerceIn(value.min, value.max)
             } else parameter.get())
@@ -321,7 +334,7 @@ class Parameters {
     }
 
     class Button(
-        val height: Float,
+        private val height: Float,
         private val action: () -> Unit,
         private val name: String,
     ) {
@@ -349,19 +362,19 @@ class Parameters {
 
     var floatValues = EnumMap(FloatValue.entries.associateWith { Parameter(it.initial) })
     var booleanValues = EnumMap(BooleanValues.entries.associateWith { Parameter(it.initial) })
-    var enumValues = EnumMap(EnumValues.entries.associateWith { Parameter(it.initial) })
+    private var enumValues = EnumMap(EnumValues.entries.associateWith { Parameter(it.initial) })
 
     var ballColors = LimitedStack<Color>(FloatValue.ColorDelay.max.toInt())
     var bounds = Pair(
         PVector(0f, 0f),
         PVector(app.width - 300f, app.height.toFloat())
     )
-    var maxBallRadius = 10f
+    private var maxBallRadius = 10f
     var ballRadius = 10f
     var hidden = false
 
     private val sliders = floatValues.map {
-        e -> Slider((e.key.ordinal + 1) * 40f, e.value, e.key, )
+        e -> Slider((e.key.ordinal + 1) * 40f, e.value, e.key)
     }
     private val pickers = enumValues.map {
         e -> Picker((sliders.last().height + (e.key.ordinal + 2) * 20f), e.value, e.key)
@@ -371,7 +384,7 @@ class Parameters {
     }
     private val buttons = arrayOf(
         Button(checkboxes.last().height + 20f, { saving = true }, "Save"),
-        Button(checkboxes.last().height + 40f, { app.shuffleSound() }, "Shuffle"),
+        Button(checkboxes.last().height + 40f, { sliders.forEach { it.shuffle() } }, "Shuffle"),
         Button(checkboxes.last().height + 60f, { parameters.toggleHidden() }, "Hide"),
     )
 
@@ -385,10 +398,10 @@ class Parameters {
         val areaWidth = app.width - parameters.bounds.second.x
         app.rect(parameters.bounds.second.x, 0f, parameters.bounds.second.x + areaWidth, app.height.toFloat())
 
-        sliders.forEach { slider -> slider.display() }
-        checkboxes.forEach { checkbox -> checkbox.display() }
-        pickers.forEach { picker -> picker.display() }
-        buttons.forEach { button -> button.display() }
+        sliders.forEach { it.display() }
+        checkboxes.forEach { it.display() }
+        pickers.forEach { it.display() }
+        buttons.forEach { it.display() }
     }
 
     fun update() {

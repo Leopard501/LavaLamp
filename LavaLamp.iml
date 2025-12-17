@@ -13,5 +13,6 @@
     <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
     <orderEntry type="library" name="processing" level="project" />
     <orderEntry type="library" name="Processing" level="project" />
+    <orderEntry type="library" name="library" level="project" />
   </component>
 </module>

@@ -25,7 +25,7 @@ fun main() {
     PApplet.main("Main")
 }
 
-class LimitedStack<T>(val max: Int): Stack<T>() {
+class LimitedStack<T>(private val max: Int): Stack<T>() {
 
     override fun push(item: T?): T? {
         val r = super.push(item)
@@ -38,13 +38,13 @@ class LimitedStack<T>(val max: Int): Stack<T>() {
     }
 }
 
-class Beat() {
+class Beat {
 
-    val beats = LimitedStack<Pair<Float, Int>>(1100)
-    val thresholdScale = 0.993f
+    private val beats = LimitedStack<Pair<Float, Int>>(1100)
+    private val thresholdScale = 0.993f
 
-    var threshold = 0f
-    var delays = LimitedStack<Int>(10)
+    private var threshold = 0f
+    private var delays = LimitedStack<Int>(10)
     var isBeat = false
 
     fun push(value: Float, time: Int) {
@@ -71,30 +71,30 @@ class Beat() {
 
 class Main: PApplet() {
 
-    val bands = 16
-    val fadeRate = 0.99f
-    val slowFadeRate = 0.998f
-    val weights = FloatArray(bands) { i -> (i + 1f).pow(2.4f) }
+    private val bands = 16
+    private val fadeRate = 0.99f
+    private val slowFadeRate = 0.998f
+    private val weights = FloatArray(bands) { i -> (i + 1f).pow(2.4f) }
 
-    lateinit var soundInp: AudioIn
-    lateinit var soundAmp: Amplitude
-    lateinit var soundFft: FFT
+    private lateinit var soundInp: AudioIn
+    private lateinit var soundAmp: Amplitude
+    private lateinit var soundFft: FFT
 
-    lateinit var beatsFft: Array<Beat>
+    private lateinit var beatsFft: Array<Beat>
     var avgBpm = 0f
 
     var amp = 0f
-    var fft: FloatArray = FloatArray(bands) { 0f }
+    private var fft: FloatArray = FloatArray(bands) { 0f }
     var fadeAmp = 0f
     var smoothAmp = 0f
     var slowFadeAmp = 0f
-    var fadeFft: FloatArray = FloatArray(bands) { 0f }
+    private var fadeFft: FloatArray = FloatArray(bands) { 0f }
     var soundColor: Color = Color.BLACK
-    var shuffleTime = 0
-    var delayedShuffleSpeed = 0f
+    private var shuffleTime = 0
+    private var delayedShuffleSpeed = 0f
     var rotation = 0f
     var pingPong = 0f
-    var pingPongDirection = 1
+    private var pingPongDirection = 1
     var fastBeat = 0f
     var slowBeat = 0f
 
@@ -110,6 +110,8 @@ class Main: PApplet() {
         rectMode(CORNERS)
 
         soundSetup()
+
+        MusicParameterGroups.randomizeWeights()
 
         parameters = Parameters()
         repeat(parameters[FloatValue.BallCount].toInt()) {
@@ -181,7 +183,7 @@ class Main: PApplet() {
         }
     }
 
-    fun soundSetup() {
+    private fun soundSetup() {
         soundAmp = Amplitude(this)
         soundFft = FFT(this, bands)
         beatsFft = Array(bands) { Beat() }
@@ -193,7 +195,7 @@ class Main: PApplet() {
         soundFft.input(soundInp)
     }
 
-    fun soundUpdate() {
+    private fun soundUpdate() {
         // amp
         amp = soundAmp.analyze()
         fadeAmp = max(amp, fadeAmp * fadeRate)
@@ -239,12 +241,6 @@ class Main: PApplet() {
             shuffleTime = millis()
         }
 
-        // auto shuffle
-        val shuffleTarget = parameters[FloatValue.ShuffleSpeed] * 1000
-        if (shuffleTarget > 1000 && millis() - shuffleTime > shuffleTarget) {
-            shuffleSound()
-        }
-
         // rotation
         rotation += (avgBpm / (3600 * 6))
         if (rotation > 1) rotation -= 1
@@ -258,16 +254,6 @@ class Main: PApplet() {
         if (pingPong <= 0) {
             pingPongDirection = 1
             pingPong = 0f
-        }
-    }
-
-    fun shuffleSound() {
-        shuffleTime = millis()
-        MusicParameterGroups.randomizeWeights()
-        FloatValue.entries.forEach {
-            if (it.musicParameter != null) {
-                it.musicParameter = MusicParameterGroups.selectWeighted()
-            }
         }
     }
 
