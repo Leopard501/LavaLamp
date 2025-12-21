@@ -63,14 +63,10 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
     ));
 
     companion object {
-        private var weights = ArrayList<MusicParameterGroups>()
+        private var weights = MusicParameterGroups.entries.map { Pair(it, app.random(50f).toInt()) }
 
         fun randomizeWeights() {
-            for (e in entries) {
-                repeat(app.random(1f, 16f).toInt()) {
-                    weights.add(e)
-                }
-            }
+            weights = MusicParameterGroups.entries.map { Pair(it, app.random(1f, 50f).toInt()) }
         }
 
         fun selectRandom(): Pair<String, () -> Float> {
@@ -78,14 +74,23 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
             return group[app.random(group.size.toFloat()).toInt()]
         }
 
+        // https://perlmaven.com/select-random-elements-from-a-weigthed-list
         fun selectWeighted(): Pair<String, () -> Float> {
-            val group = weights[app.random(weights.size.toFloat()).toInt()].parameters
+            val r = app.random(weights.sumOf { it.second }.toFloat()).toInt()
+            var i = 0
+            var w = weights[0].second
+            while (w <= r) {
+                i++
+                w += weights[i].second
+            }
+            val group = weights[i].first.parameters
             return group[app.random(group.size.toFloat()).toInt()]
         }
     }
 }
 
-enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int, var musicParameter: Pair<String, () -> Float>?) {
+enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int,
+                      var musicParameter: Pair<String, () -> Float>?) {
     BallRed("Red", 1f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     BallGreen("Green", 0f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
@@ -251,9 +256,8 @@ class Parameters {
         fun shuffle() {
             if (value.musicParameter?.second == null) return
 
-            if (app.random(5f) < 1) {
+            if (app.random(10f) < 1)
                 MusicParameterGroups.randomizeWeights()
-            }
             value.musicParameter = MusicParameterGroups.selectWeighted()
             timer = (parameters[FloatValue.ShuffleSpeed] *
                     if (parameters[BooleanValues.ParameterShuffle]) {
