@@ -97,6 +97,8 @@ class Main: PApplet() {
     private var pingPongDirection = 1
     var fastBeat = 0f
     var slowBeat = 0f
+    var stutter = 0f
+    var randomStutter = 0f
 
     override fun settings() {
         size(1100, 900)
@@ -254,6 +256,13 @@ class Main: PApplet() {
         if (pingPong <= 0) {
             pingPongDirection = 1
             pingPong = 0f
+        }
+
+        // stutter
+        if (isBeat) {
+            stutter += 0.05f
+            randomStutter = random(1f)
+            if (stutter >= 1) stutter = 0f
         }
     }
 

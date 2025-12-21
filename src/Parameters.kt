@@ -17,11 +17,11 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
         Pair("Yellow") { (app.soundColor.red + app.soundColor.green) / 511f },
     )),
     BPM(arrayOf(
-        Pair("BPM") { (app.avgBpm - 30) / 120 },
-        Pair("Inverse BPM") { (1 - (app.avgBpm - 30) / 120) },
+        Pair("Normal") { (app.avgBpm - 30) / 120 },
+        Pair("Inverse") { (1 - (app.avgBpm - 30) / 120) },
     )),
     Amp(arrayOf(
-        Pair("Amp") { app.fadeAmp },
+        Pair("Normal") { app.fadeAmp },
         Pair("Slow") { app.slowFadeAmp },
         Pair("Smooth") { app.smoothAmp },
         Pair("Spiky") { app.amp },
@@ -49,6 +49,11 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
         Pair("Ping-Pong") { app.pingPong },
         Pair("Pong-Ping") { 1 - app.pingPong },
     )),
+    Stutter(arrayOf(
+        Pair("Increasing") { app.stutter },
+        Pair("Decreasing") { 1 - app.stutter },
+        Pair("Random") { app.randomStutter },
+    )),
     Mouse(arrayOf(
         Pair("X") { app.mouseX / parameters.bounds.second.x },
         Pair("Y") { 1 - app.mouseY / parameters.bounds.second.y },
@@ -69,13 +74,14 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
             weights = MusicParameterGroups.entries.map { Pair(it, app.random(1f, 50f).toInt()) }
         }
 
-        fun selectRandom(): Pair<String, () -> Float> {
-            val group = entries[app.random(entries.size.toFloat()).toInt()].parameters
-            return group[app.random(group.size.toFloat()).toInt()]
+        fun selectRandom(): FloatValue.MusicParameter {
+            val group = entries[app.random(entries.size.toFloat()).toInt()]
+            val elem = group.parameters[app.random(group.parameters.size.toFloat()).toInt()]
+            return FloatValue.MusicParameter(elem.first, group.name, elem.second)
         }
 
         // https://perlmaven.com/select-random-elements-from-a-weigthed-list
-        fun selectWeighted(): Pair<String, () -> Float> {
+        fun selectWeighted(): FloatValue.MusicParameter {
             val r = app.random(weights.sumOf { it.second }.toFloat()).toInt()
             var i = 0
             var w = weights[0].second
@@ -83,14 +89,15 @@ enum class MusicParameterGroups(val parameters: Array<Pair<String, () -> Float>>
                 i++
                 w += weights[i].second
             }
-            val group = weights[i].first.parameters
-            return group[app.random(group.size.toFloat()).toInt()]
+            val group = weights[i].first
+            val elem = group.parameters[app.random(group.parameters.size.toFloat()).toInt()]
+            return FloatValue.MusicParameter(elem.first, group.name, elem.second)
         }
     }
 }
 
 enum class FloatValue(val id: String, val initial: Float, val min: Float, val max: Float, val scale: Int,
-                      var musicParameter: Pair<String, () -> Float>?) {
+                      var musicParameter: MusicParameter?) {
     BallRed("Red", 1f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     BallGreen("Green", 0f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     BallBlue("Blue", 0f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
@@ -109,7 +116,9 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     BackgroundAlpha("Background Alpha", 0f, 0f, 255f, 2, MusicParameterGroups.selectRandom()),
     MouseForce("Mouse Force", 1f, 0f, 10f, 2, null),
-    ShuffleSpeed("Shuffle Speed", 30f, 0f, 120f, 2, null),
+    ShuffleSpeed("Shuffle Speed", 30f, 0f, 120f, 2, null);
+
+    data class MusicParameter(val name: String, val groupName: String, val function: () -> Float)
 }
 
 enum class BooleanValues(val id: String, val initial: Boolean) {
@@ -194,13 +203,15 @@ class Parameters {
             if (!parameters[BooleanValues.MusicMode] || value.musicParameter == null) return
             app.textAlign(PConstants.LEFT)
             app.fill(parameters.ballColors.last().rgb)
-            if (value.musicParameter != null)
-                app.text(value.musicParameter!!.first, end + 0.1f * areaWidth, height)
+            if (value.musicParameter != null) {
+                app.text("${value.musicParameter!!.groupName}:", end + 0.1f * areaWidth, height - 8f)
+                app.text(value.musicParameter!!.name, end + 0.1f * areaWidth, height + 8f)
+            }
         }
 
         fun update() {
-            if (parameters[BooleanValues.MusicMode] && value.musicParameter?.second != null) {
-                musicScale(value.musicParameter?.second)
+            if (parameters[BooleanValues.MusicMode] && value.musicParameter?.function != null) {
+                musicScale(value.musicParameter?.function)
                 timer--
                 if (timer <= 0) shuffle()
             }
@@ -254,7 +265,7 @@ class Parameters {
         }
 
         fun shuffle() {
-            if (value.musicParameter?.second == null) return
+            if (value.musicParameter == null) return
 
             if (app.random(10f) < 1)
                 MusicParameterGroups.randomizeWeights()
