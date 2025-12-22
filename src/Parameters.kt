@@ -110,7 +110,6 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     BallStick("Stickiness", 0.05f, 0f, 1f, 2, MusicParameterGroups.selectRandom()),
     Gravity("Gravity", 0.1f, 0f, 1f, 2, MusicParameterGroups.selectRandom()),
     GravityDirection("Gravity Direction", 0f, 0f, PConstants.TWO_PI, 1, MusicParameterGroups.selectRandom()),
-    PolarGravity("Polar Gravity", 0f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     PoleX("Pole X", 0.5f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     PoleY("Pole Y", 0.5f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
     Dampening("Dampening", 0.1f, 0f, 1f, 1, MusicParameterGroups.selectRandom()),
@@ -121,13 +120,14 @@ enum class FloatValue(val id: String, val initial: Float, val min: Float, val ma
     data class MusicParameter(val name: String, val groupName: String, val function: () -> Float)
 }
 
-enum class BooleanValues(val id: String, val initial: Boolean) {
-    ShowGrid("Show Grid", false),
-    InvertMouseForce("Invert Mouse Force", false),
-    MusicMode("Music Mode", true),
-    ParameterShuffle("Per-Parameter Shuffle", true),
-    HorizontalBarrier("Horizontal Barrier", true),
-    VerticalBarrier("Vertical Barrier", true),
+enum class BooleanValues(val id: String, val initial: Boolean, var musicParameter: Boolean?) {
+    HorizontalBarrier("Horizontal Barrier", true, app.random(2f) > 1),
+    VerticalBarrier("Vertical Barrier", true, app.random(2f) > 1),
+    PolarGravity("Polar Gravity", false, app.random(2f) < 1),
+    ShowGrid("Show Grid", false, null),
+    InvertMouseForce("Invert Mouse Force", false, null),
+    MusicMode("Music Mode", true, null),
+    ParameterShuffle("Per-Parameter Shuffle", true, null),
 }
 
 open class Mode(val next: Mode?, val id: String)
@@ -203,10 +203,8 @@ class Parameters {
             if (!parameters[BooleanValues.MusicMode] || value.musicParameter == null) return
             app.textAlign(PConstants.LEFT)
             app.fill(parameters.ballColors.last().rgb)
-            if (value.musicParameter != null) {
-                app.text("${value.musicParameter!!.groupName}:", end + 0.1f * areaWidth, height - 8f)
-                app.text(value.musicParameter!!.name, end + 0.1f * areaWidth, height + 8f)
-            }
+            app.text("${value.musicParameter!!.groupName}:", end + 0.1f * areaWidth, height - 8f)
+            app.text(value.musicParameter!!.name, end + 0.1f * areaWidth, height + 8f)
         }
 
         fun update() {
@@ -320,11 +318,14 @@ class Parameters {
     class Checkbox(
         val height: Float,
         private val v: Parameter<Boolean>,
-        private val name: String
+        private val value: BooleanValues
     ) {
+        private var timer = 0
+
         fun display() {
             val areaWidth = app.width - parameters.bounds.second.x
             val start = parameters.bounds.second.x + 0.1f * areaWidth
+            val end = app.width - 100 - 0.1f * areaWidth
 
             app.stroke(255f)
             app.strokeWeight(2f)
@@ -334,11 +335,21 @@ class Parameters {
 
             app.textAlign(PConstants.LEFT)
             app.fill(255f)
-            app.text(name, start + 10f + 10f, height)
+            app.text(value.id, start + 10f + 10f, height)
+
+            if (!parameters[BooleanValues.MusicMode] || value.musicParameter == null) return
+            app.textAlign(PConstants.LEFT)
+            app.fill(parameters.ballColors.last().rgb)
+            app.text(if (value.musicParameter!!) { "Enabled" } else { "Disabled" }, end + 0.1f * areaWidth, height)
         }
 
         fun update() {
             if (parameters.hidden) return
+
+            if (parameters[BooleanValues.MusicMode]) {
+                timer--
+                if (timer <= 0) shuffle()
+            }
 
             if (!(mousePressedPulse &&
                 app.mouseX > parameters.bounds.second.x &&
@@ -347,6 +358,17 @@ class Parameters {
                 return
 
             v.set(!v.get())
+        }
+
+        fun shuffle() {
+            if (value.musicParameter == null) return
+
+            value.musicParameter = app.random(2f) < 1
+            v.set(value.musicParameter!!)
+            timer = (parameters[FloatValue.ShuffleSpeed] *
+                    if (parameters[BooleanValues.ParameterShuffle]) {
+                        parameters[FloatValue.ShuffleSpeed] * 2f.pow(app.random(-2f, 3f).toInt())
+                    } else { 1f }).toInt()
         }
     }
 
@@ -397,11 +419,13 @@ class Parameters {
         e -> Picker((sliders.last().height + (e.key.ordinal + 2) * 20f), e.value, e.key)
     }
     private val checkboxes = booleanValues.map {
-        e -> Checkbox(pickers.last().height + (e.key.ordinal + 1) * 20f, e.value, e.key.id)
+        e -> Checkbox(pickers.last().height + (e.key.ordinal + 1) * 20f, e.value, e.key)
     }
     private val buttons = arrayOf(
         Button(checkboxes.last().height + 20f, { saving = true }, "Save"),
-        Button(checkboxes.last().height + 40f, { sliders.forEach { it.shuffle() } }, "Shuffle"),
+        Button(checkboxes.last().height + 40f, {
+            sliders.forEach { it.shuffle() }
+            checkboxes.forEach { it.shuffle() } }, "Shuffle"),
         Button(checkboxes.last().height + 60f, { parameters.toggleHidden() }, "Hide"),
     )
 

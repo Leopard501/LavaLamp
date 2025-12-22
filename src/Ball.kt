@@ -21,7 +21,7 @@ class Ball {
 
     fun update() {
         // basic movement
-        velocity.add(if (parameters[FloatValue.PolarGravity] > 0.5f) {
+        velocity.add(if (parameters[BooleanValues.PolarGravity]) {
             PVector.fromAngle(
             (
                         position - PVector(
